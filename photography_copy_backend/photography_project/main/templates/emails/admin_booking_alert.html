@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Booking Alert | Dhrumil Bajak Photography</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+        
+        .alert-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: linear-gradient(135deg, #dc2626 0%, #7c2d12 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(220, 38, 38, 0.1);
+        }
+        
+        .alert-header {
+            background: rgba(220, 38, 38, 0.2);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .alert-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .alert-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .booking-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .info-label {
+            color: #d4af37;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        .info-value {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #d4af37;
+            color: #000000;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #d4af37;
+            border: 1px solid #d4af37;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-text {
+            color: #d4af37;
+            font-size: 12px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="alert-container">
+        <div class="alert-header">
+            <div class="alert-icon">📸</div>
+            <div class="alert-title">New Booking Received</div>
+        </div>
+        
+        <div class="content">
+            <p style="color: #ffffff; font-size: 16px; margin-bottom: 20px;">
+                A new booking has been submitted through your website. Here are the details:
+            </p>
+            
+            <div class="booking-info">
+                <div class="info-row">
+                    <div class="info-label">Customer</div>
+                    <div class="info-value">{{ name }}</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">{{ email }}</div>
+                </div>
+                
+                {% if phone %}
+                <div class="info-row">
+                    <div class="info-label">Phone</div>
+                    <div class="info-value">{{ phone }}</div>
+                </div>
+                {% endif %}
+                
+                <div class="info-row">
+                    <div class="info-label">Service</div>
+                    <div class="info-value">{{ service_title }}</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Date</div>
+                    <div class="info-value">{{ event_date|date:"F j, Y" }}</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Time</div>
+                    <div class="info-value">{{ time_slot }}</div>
+                </div>
+                
+                {% if location %}
+                <div class="info-row">
+                    <div class="info-label">Location</div>
+                    <div class="info-value">{{ location }}</div>
+                </div>
+                {% endif %}
+                
+                {% if message %}
+                <div class="info-row">
+                    <div class="info-label">Message</div>
+                    <div class="info-value">{{ message }}</div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="action-buttons">
+                <a href="{% url 'admin:main_booking' %}" class="btn btn-primary">
+                    View in Admin Panel
+                </a>
+                <a href="tel:{{ phone }}" class="btn btn-secondary">
+                    Call Customer
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="footer-text">Crafting Legacies Through Light</div>
+        </div>
+    </div>
+</body>
+</html>

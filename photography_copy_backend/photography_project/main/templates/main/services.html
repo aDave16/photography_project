@@ -1,0 +1,292 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services | Dhrumil Bajak Cinematic Photography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'css/cinematic.css' %}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0a0a0a',
+                        charcoal: '#1a1a1a',
+                        gold: '#D4AF37',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body x-data="{ scrolled: true, mobileMenu: false }" class="cursor-none">
+    {% csrf_token %}
+
+    <!-- Custom Cursor -->
+    <div id="cursor" class="custom-cursor hidden md:block"></div>
+
+    <!-- Sticky Navbar -->
+    <nav
+        class="fixed w-full z-50 bg-dark/90 backdrop-blur-xl py-4 border-b border-gold/10 transition-all duration-700 ease-in-out px-6 md:px-12 flex justify-between items-center">
+        <a href="{% url 'home' %}" class="text-2xl font-light tracking-[0.3em] uppercase playfair group">
+            Dhrumil <span class="text-gold transition-all duration-500 group-hover:tracking-[0.5em]">Bajak</span>
+        </a>
+
+        <div class="hidden md:flex space-x-12 text-[10px] uppercase tracking-[0.4em] font-light">
+            <a href="{% url 'home' %}" class="nav-link hover:text-gold transition-colors">Home</a>
+            <a href="{% url 'portfolio' %}" class="nav-link hover:text-gold transition-colors">Portfolio</a>
+            <a href="{% url 'about' %}" class="nav-link hover:text-gold transition-colors">About</a>
+            <a href="{% url 'services' %}" class="nav-link text-gold">Services</a>
+            <a href="{% url 'booking' %}" class="nav-link text-white font-semibold hover:text-gold transition-colors">Book Session</a>
+            <a href="{% url 'contact' %}" class="nav-link hover:text-gold transition-colors">Contact</a>
+        </div>
+
+        <button @click="mobileMenu = !mobileMenu" class="md:hidden text-white hover:text-gold transition-colors">
+            <i data-lucide="menu" x-show="!mobileMenu"></i>
+            <i data-lucide="x" x-show="mobileMenu"></i>
+        </button>
+    </nav>
+
+    <!-- Animated Waves Header -->
+    <div class="wave-container">
+        <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+            <defs>
+                <path id="gentle-wave" d="M-160 44c30 0 58-10 88-10s 58 10 88 10 58-10 88-10 58 10 88 10 v44h-352z" />
+            </defs>
+            <g class="parallax-waves">
+                <use xlink:href="#gentle-wave" x="48" y="0" />
+                <use xlink:href="#gentle-wave" x="48" y="3" />
+                <use xlink:href="#gentle-wave" x="48" y="5" />
+                <use xlink:href="#gentle-wave" x="48" y="7" />
+            </g>
+        </svg>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="mobileMenu" x-transition:enter="transition ease-out duration-500"
+        x-transition:enter-start="opacity-0 translate-y-[-100%]" x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-400" x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-[-100%]"
+        class="fixed inset-0 bg-dark z-40 flex flex-col items-center justify-center space-y-10 text-xl uppercase tracking-[0.4em] font-light"
+        x-cloak>
+        <a @click="mobileMenu = false" href="{% url 'home' %}">Home</a>
+        <a @click="mobileMenu = false" href="{% url 'portfolio' %}">Portfolio</a>
+        <a @click="mobileMenu = false" href="{% url 'about' %}">About</a>
+        <a @click="mobileMenu = false" href="{% url 'services' %}" class="text-gold">Services</a>
+        <a @click="mobileMenu = false" href="{% url 'contact' %}">Contact</a>
+        
+        <!-- Mobile Booking Button -->
+        <button @click="mobileMenu = false; setTimeout(() => document.getElementById('advanced-features-overlay')?.classList.remove('hidden'), 300);" 
+            class="mt-6 px-8 py-4 bg-gold text-dark font-bold uppercase tracking-[0.2em] text-sm rounded-full hover:bg-white transition-all transform hover:scale-105 shadow-lg">
+            Book Now
+        </button>
+    </div>
+
+    <!-- Services Content -->
+    <main class="pt-40 pb-32 px-6 md:px-12">
+        <div class="max-w-7xl mx-auto space-y-32">
+
+            <!-- Header -->
+            <div class="text-center space-y-8 max-w-3xl mx-auto reveal">
+                <span class="text-[10px] uppercase tracking-[0.6em] text-gold">The Experience</span>
+                <h1 class="text-5xl md:text-7xl font-light playfair tracking-wide leading-tight">Investment</h1>
+                <p class="text-white/50 font-light leading-relaxed text-lg">
+                    Excellence is never an accident. It is the result of high intention,
+                    sincere effort, and intelligent execution. Explore our curated
+                    packages designed for those who value timeless artistry.
+                </p>
+            </div>
+
+            <!-- Dynamic Service Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                {% for service in services %}
+                <div class="glass p-12 flex flex-col reveal group hover:glass-gold transition-all duration-700"
+                     x-data="{ animationDelay: {{ forloop.counter0|add:1 }}00 }"
+                     :style="`animation-delay: ${animationDelay}ms`">
+                    {% if service.cover_image %}
+                    <div class="aspect-video mb-8 overflow-hidden rounded-lg">
+                        <img src="{{ service.cover_image.url }}" alt="{{ service.title }}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    {% elif service.image %}
+                    <div class="aspect-video mb-8 overflow-hidden rounded-lg">
+                        <img src="{{ service.image.url }}" alt="{{ service.title }}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="space-y-6 mb-16">
+                        <span class="text-[10px] uppercase tracking-[0.4em] text-gold group-hover:text-white transition-colors">
+                            {{ service.get_service_type_display }}
+                        </span>
+                        <h2 class="text-3xl playfair font-light italic">{{ service.title }}</h2>
+                        {% if service.tagline %}
+                        <p class="text-white/70 italic">{{ service.tagline }}</p>
+                        {% endif %}
+                        <div class="pt-4 text-4xl font-light playfair text-gold group-hover:text-white transition-colors">
+                            {{ service.formatted_price }}
+                        </div>
+                        {% if service.price_note %}
+                        <div class="text-sm text-gray-400">{{ service.price_note }}</div>
+                        {% endif %}
+                    </div>
+
+                    <ul class="space-y-4 text-[11px] uppercase tracking-[0.3em] font-light text-white/50 mb-16 flex-grow">
+                        {% for feature in service.get_features_list|slice:":4" %}
+                        <li class="flex items-center space-x-3 group-hover:text-white transition-colors">
+                            <i data-lucide="check" class="w-4 h-4 text-gold flex-shrink-0"></i>
+                            <span>{{ feature }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="text-gray-400">Contact for package details</li>
+                        {% endfor %}
+                    </ul>
+
+                    {% if service.duration %}
+                    <div class="text-center text-sm text-gray-400 mb-6">
+                        <i data-lucide="clock" class="w-4 h-4 inline mr-2"></i>
+                        {{ service.duration }}
+                    </div>
+                    {% endif %}
+
+                    <div class="space-y-3">
+                        <a href="{{ service.get_absolute_url }}" 
+                           class="w-full py-5 border border-gold/20 text-center text-[10px] uppercase tracking-[0.5em] hover:bg-gold hover:text-dark transition-all duration-700">
+                            View Details
+                        </a>
+                        <a href="{% url 'booking' %}" 
+                           class="w-full py-5 bg-gold/10 border border-gold/30 text-center text-[10px] uppercase tracking-[0.5em] hover:bg-gold hover:text-dark transition-all duration-700">
+                            Book Now
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-3 text-center py-20">
+                    <p class="text-gray-400 text-lg">No services available at the moment.</p>
+                    <a href="{% url 'contact' %}" class="inline-block mt-4 text-gold hover:text-white transition-colors">
+                        Contact us for custom packages
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Process Section -->
+            <div class="glass p-20 md:p-32 space-y-20 reveal">
+                <div class="text-center space-y-4">
+                    <span class="text-[10px] uppercase tracking-[0.6em] text-gold">The Method</span>
+                    <h2 class="text-3xl md:text-5xl playfair font-light italic">The Creative Journey</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-16">
+                    <div class="space-y-6 text-center group">
+                        <span
+                            class="text-6xl font-light playfair text-gold/10 group-hover:text-gold/40 transition-colors">I</span>
+                        <h4 class="text-[10px] uppercase tracking-[0.4em] font-medium text-gold">Consultation</h4>
+                        <p class="text-[11px] text-white/40 leading-relaxed uppercase tracking-widest">Defining your
+                            visual legacy over private audience.</p>
+                    </div>
+                    <div class="space-y-6 text-center group">
+                        <span
+                            class="text-6xl font-light playfair text-gold/10 group-hover:text-gold/40 transition-colors">II</span>
+                        <h4 class="text-[10px] uppercase tracking-[0.4em] font-medium text-gold">Production</h4>
+                        <p class="text-[11px] text-white/40 leading-relaxed uppercase tracking-widest">Capturing the
+                            soul of the moment through cinematic light.</p>
+                    </div>
+                    <div class="space-y-6 text-center group">
+                        <span
+                            class="text-6xl font-light playfair text-gold/10 group-hover:text-gold/40 transition-colors">III</span>
+                        <h4 class="text-[10px] uppercase tracking-[0.4em] font-medium text-gold">Curation</h4>
+                        <p class="text-[11px] text-white/40 leading-relaxed uppercase tracking-widest">Meticulous
+                            editorial grade post-production artistry.</p>
+                    </div>
+                    <div class="space-y-6 text-center group">
+                        <span
+                            class="text-6xl font-light playfair text-gold/10 group-hover:text-gold/40 transition-colors">IV</span>
+                        <h4 class="text-[10px] uppercase tracking-[0.4em] font-medium text-gold">Exhibition</h4>
+                        <p class="text-[11px] text-white/40 leading-relaxed uppercase tracking-widest">Final delivery of
+                            your timeless visual narrative.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-20 px-6 border-t border-gold/5 text-center space-y-10 bg-charcoal/30">
+        <div class="flex justify-center">
+            <div class="social-icon-container">
+                <a href="https://instagram.com/dhrumil_bajak" target="_blank" rel="noopener noreferrer" aria-label="Visit our Instagram"
+                    data-tooltip="Instagram" class="social-btn btn-instagram transition-all duration-500">
+                    <img src="https://cdn.simpleicons.org/instagram/white" alt="Instagram">
+                </a>
+                <a href="https://wa.me/919998001549" target="_blank" rel="noopener noreferrer" aria-label="Message us on WhatsApp"
+                    data-tooltip="WhatsApp" class="social-btn btn-whatsapp transition-all duration-500">
+                    <img src="https://cdn.simpleicons.org/whatsapp/white" alt="WhatsApp">
+                </a>
+                <a href="tel:+919998001549" aria-label="Call us" data-tooltip="Call"
+                    class="social-btn btn-call transition-all duration-500">
+                    <img src="https://img.icons8.com/ios-filled/50/ffffff/phone.png" alt="Call">
+                </a>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30">
+                &copy; 2026 Dhrumil Bajak Photography. All rights reserved.
+            </p>
+            <p class="text-[8px] uppercase tracking-[0.2em] text-gold/40 italic">
+                Crafting Legacies Through Light
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Custom Cursor Logic
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        document.querySelectorAll('a, button, .cursor-pointer').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+        });
+
+        // Reveal Animation Logic
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, observerOptions);
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+    <script src="{% static 'js/features.js' %}"></script>
+</body>
+
+</html>

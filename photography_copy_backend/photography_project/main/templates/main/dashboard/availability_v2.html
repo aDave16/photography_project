@@ -1,0 +1,593 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Availability | Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/cinematic.css' %}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #050505; color: #ffffff; overflow-x: hidden; }
+        .glass { background: rgba(20,20,20,0.6); backdrop-filter: blur(20px); border: 1px solid rgba(212,175,55,0.15); }
+        .spinner { border: 2px solid rgba(212,175,55,0.2); border-top: 2px solid #D4AF37; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0%{transform:rotate(0deg);}100%{transform:rotate(360deg);} }
+    </style>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { dark: '#080808', charcoal: '#111111', gold: '#D4AF37' } } } }
+    </script>
+
+            <!-- Date Details Modal (Bookings & Blocks) -->
+            <div id="dateBookingsModal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-start justify-center p-6">
+                <div class="glass rounded-2xl p-6 max-w-2xl w-full">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">Details for <span x-text="selectedDate"></span></h3>
+                        <button onclick="document.getElementById('dateBookingsModal').classList.add('hidden')" class="text-white/60 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    </div>
+
+                    <!-- Blocked Status Section -->
+                    <div x-show="dateAvailability && dateAvailability.blocked" class="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                        <div class="flex items-center gap-3 text-yellow-400 mb-1">
+                            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                            <span class="font-bold uppercase tracking-wider text-xs">Date is Blocked</span>
+                        </div>
+                        <p class="text-sm text-gray-300" x-text="dateAvailability.reason || 'No reason provided'"></p>
+                    </div>
+
+                    <!-- Bookings Section -->
+                    <div class="mb-2 flex items-center justify-between">
+                        <h4 class="text-sm font-bold uppercase tracking-[0.2em] text-white/40">Bookings</h4>
+                        <span class="px-2 py-0.5 bg-white/5 rounded text-[10px] text-white/60" x-text="dateBookings.length + ' Total'"></span>
+                    </div>
+
+                    <template x-if="dateBookings.length">
+                        <div class="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                            <template x-for="b in dateBookings" :key="b.id">
+                                <div class="p-4 bg-[#0d0d0d] border border-white/5 rounded-xl flex justify-between items-center group hover:border-gold/30 transition-all">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center text-gold font-bold" x-text="b.name.charAt(0).toUpperCase()"></div>
+                                        <div>
+                                            <div class="font-semibold text-white group-hover:text-gold transition-colors" x-text="b.name"></div>
+                                            <div class="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                                                <span x-text="b.time_slot"></span>
+                                                <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                                                <span x-text="b.service"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button @click="openBookingDetail(b.id)" class="px-4 py-2 bg-white/5 hover:bg-gold hover:text-black text-white text-xs font-bold rounded-lg transition-all uppercase tracking-widest">View Details</button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template x-if="!dateBookings.length">
+                        <div class="text-center text-gray-500 py-10 bg-[#0d0d0d] border border-dashed border-white/10 rounded-xl">
+                            <i data-lucide="calendar-x" class="w-10 h-10 mx-auto mb-3 opacity-20"></i>
+                            <p class="text-sm">No bookings for this date</p>
+                        </div>
+                    </template>
+                    
+                    <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-white/5">
+                        <button @click="toggleBlockDate(selectedDate)" class="px-4 py-2 bg-white/5 text-white text-xs font-bold rounded-lg hover:bg-red-500/20 hover:text-red-400 transition-all uppercase tracking-widest" x-text="dateAvailability && dateAvailability.blocked ? 'Unblock Date' : 'Block Date'"></button>
+                        <button @click="openAdminCreateBooking()" class="px-4 py-2 bg-gold text-black text-xs font-bold rounded-lg hover:brightness-95 transition-all uppercase tracking-widest">Add New Booking</button>
+                    </div>
+                </div>
+            </div>
+
+    <div id="bookingDetailModal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-6">
+        <div class="glass rounded-2xl p-6 max-w-lg w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Booking Details</h3>
+                <button onclick="document.getElementById('bookingDetailModal').classList.add('hidden')" class="text-white/60">Close</button>
+            </div>
+            <div x-show="selectedBooking">
+                <div class="space-y-2">
+                    <div><strong>Client:</strong> <span x-text="selectedBooking.name"></span></div>
+                    <div><strong>Email:</strong> <span x-text="selectedBooking.email"></span></div>
+                    <div><strong>Phone:</strong> <span x-text="selectedBooking.phone"></span></div>
+                    <div><strong>Service:</strong> <span x-text="selectedBooking.service"></span></div>
+                    <div><strong>Date:</strong> <span x-text="selectedBooking.event_date"></span></div>
+                    <div><strong>Time:</strong> <span x-text="selectedBooking.time_slot"></span></div>
+                    <div><strong>Location:</strong> <span x-text="selectedBooking.location"></span></div>
+                    <div><strong>Notes:</strong> <span x-text="selectedBooking.message"></span></div>
+                    <div><strong>Payment:</strong> <span x-text="selectedBooking.payment_status"></span></div>
+                    <div><strong>Status:</strong> <span x-text="selectedBooking.status"></span></div>
+                    <div><strong>Booking ID:</strong> <span x-text="selectedBooking.id"></span></div>
+                </div>
+
+                <div class="mt-4 flex gap-2">
+                    <button @click="adminMarkComplete(selectedBooking.id)" class="px-4 py-2 bg-green-600 rounded text-white text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition-all">Mark Complete</button>
+                    <button @click="adminCancelBooking(selectedBooking.id)" class="px-4 py-2 bg-red-600 rounded text-white text-xs font-bold uppercase tracking-wider hover:bg-red-700 transition-all">Cancel Booking</button>
+                    <button @click="openEditBooking(selectedBooking)" class="px-4 py-2 bg-gold text-black text-xs font-bold rounded uppercase tracking-wider hover:brightness-95 transition-all">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminBookingModal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-6">
+        <div class="glass rounded-2xl p-6 max-w-lg w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Create / Edit Booking</h3>
+                <button onclick="document.getElementById('adminBookingModal').classList.add('hidden')" class="text-white/60">Close</button>
+            </div>
+            <div class="space-y-3">
+                <input x-model="adminForm.name" placeholder="Full name" class="w-full p-2 bg-gray-900 rounded" />
+                <input x-model="adminForm.email" placeholder="Email" class="w-full p-2 bg-gray-900 rounded" />
+                <input x-model="adminForm.phone" placeholder="Phone" class="w-full p-2 bg-gray-900 rounded" />
+                <select x-model="adminForm.service_id" class="w-full p-2 bg-gray-900 rounded">
+                    <option value="">Select service</option>
+                    {% for s in services %}
+                    <option value="{{ s.id }}">{{ s.title }}</option>
+                    {% endfor %}
+                </select>
+                <input x-model="adminForm.event_date" type="date" class="w-full p-2 bg-gray-900 rounded" />
+                <input x-model="adminForm.time_slot" placeholder="Time slot" class="w-full p-2 bg-gray-900 rounded" />
+                <input x-model="adminForm.location" placeholder="Location" class="w-full p-2 bg-gray-900 rounded" />
+                <textarea x-model="adminForm.message" placeholder="Notes" class="w-full p-2 bg-gray-900 rounded"></textarea>
+                <div class="flex gap-2">
+                    <button @click="adminCreateBooking()" class="px-4 py-2 bg-gold rounded">Save Booking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="blockRangeModal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-6">
+        <div class="glass rounded-2xl p-6 max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Block Date Range</h3>
+                <button onclick="document.getElementById('blockRangeModal').classList.add('hidden')" class="text-white/60">Close</button>
+            </div>
+            <div class="space-y-3">
+                <input id="block_start" placeholder="Start date" type="date" class="w-full p-2 bg-gray-900 rounded" />
+                <input id="block_end" placeholder="End date" type="date" class="w-full p-2 bg-gray-900 rounded" />
+                <input id="block_reason" placeholder="Reason" class="w-full p-2 bg-gray-900 rounded" />
+                <div class="flex gap-2">
+                    <button onclick="(function(){ const payload={start_date:document.getElementById('block_start').value,end_date:document.getElementById('block_end').value,reason:document.getElementById('block_reason').value}; document.querySelector('[x-data]').__x.$data.createBlockRange(payload); })()" class="px-4 py-2 bg-gold rounded">Block</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic List Modal (bookings / blocks) -->
+    <div id="listModal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-start justify-center p-6">
+        <div class="glass rounded-2xl p-6 max-w-2xl w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold" x-text="selectedListTitle">List</h3>
+                <button onclick="document.getElementById('listModal').classList.add('hidden')" class="text-white/60">Close</button>
+            </div>
+            <template x-if="listItems.length">
+                <div class="space-y-3">
+                    <template x-for="item in listItems" :key="item.id">
+                        <div class="p-3 bg-gray-900 rounded-lg flex justify-between items-center">
+                            <div>
+                                <div class="font-semibold" x-text="item.title"></div>
+                                <div class="text-sm text-gray-400" x-text="item.subtitle"></div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button @click="focusListItem(item)" class="px-3 py-2 bg-gold text-black rounded">Show</button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <template x-if="!listItems.length">
+                <div class="text-center text-gray-400 py-6">No items</div>
+            </template>
+        </div>
+    </div>
+</head>
+
+<body x-data="{ mobileMenu: false }" class="text-white selection:bg-gold/30 selection:text-white">
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Mobile Sidebar Overlay -->
+        <div x-show="mobileMenu" style="display: none;" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden" @click="mobileMenu = false" x-transition.opacity></div>
+
+        <!-- Left Sidebar Navigation -->
+        <aside class="fixed lg:static inset-y-0 left-0 z-50 w-72 bg-[#0a0a0a] border-r border-white/5 transform transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col h-full shadow-2xl" :class="mobileMenu ? 'translate-x-0' : '-translate-x-full'">
+
+            <!-- Logo area -->
+            <div class="px-8 py-8 flex items-center justify-between border-b border-white/5">
+                <a href="{% url 'home' %}" class="text-xl font-light tracking-[0.2em] uppercase playfair flex items-center gap-2">Dhrumil <span class="text-gold">Admin</span></a>
+                <button @click="mobileMenu = false" class="lg:hidden text-white/50 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-4 py-8 space-y-2 overflow-y-auto">
+                <a href="{% url 'admin_dashboard' %}" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Dashboard Profile
+                </a>
+
+                <a href="{% url 'admin_gallery' %}" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="folder-plus" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Create Gallery
+                </a>
+
+                <a href="{% url 'admin_gallery' %}" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="upload-cloud" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Upload Images
+                </a>
+
+                <a href="{% url 'admin_gallery' %}" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="film" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Manage Video Reels
+                </a>
+
+                <div class="pt-4 pb-2 px-4"><span class="text-[10px] uppercase tracking-[0.3em] text-white/30 font-bold">Studio Ops</span></div>
+
+                <a href="{% url 'admin_bookings' %}" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="calendar-check" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Manage Bookings
+                </a>
+
+                <a href="{% url 'dashboard_inquiries' %}" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="message-circle-question" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Customer Inquiries
+                </a>
+
+                <a href="{% url 'admin_bookings' %}" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group bg-white/5 text-gold border border-gold/20">
+                    <i data-lucide="calendar" class="w-5 h-5 text-gold"></i>
+                    Availability Control
+                </a>
+
+                <a href="{% url 'admin_services' %}" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="indian-rupee" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Revenue & Pricing
+                </a>
+
+                <a href="{% url 'admin_contacts' %}" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    AI Concierge (Bot)
+                </a>
+
+                <a href="{% url 'admin_contacts' %}" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="message-square" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    WhatsApp Integration
+                </a>
+
+                <a href="{% url 'admin_contacts' %}" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Financial Cloud
+                </a>
+            </nav>
+
+            <!-- Bottom Action -->
+            <div class="px-6 py-6 border-t border-white/5">
+                <form action="{% url 'logout' %}" method="post" class="w-full">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium text-white/50 hover:text-red-400 hover:bg-red-400/10 transition-all transition-colors group">
+                        <i data-lucide="log-out" class="w-5 h-5 group-hover:text-red-400"></i>
+                        Secure Logout
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+
+            <!-- Top Header -->
+            <header class="h-20 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/5 flex items-center justify-between px-6 md:px-10 z-30 sticky top-0">
+                <div class="flex items-center gap-4">
+                    <button @click="mobileMenu = true" class="lg:hidden text-white/70 hover:text-white bg-white/5 p-2 rounded-lg"><i data-lucide="menu" class="w-5 h-5"></i></button>
+                    <h2 class="text-lg md:text-xl font-medium tracking-wide">Availability Control</h2>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <div class="hidden sm:block text-right">
+                        <p class="text-sm font-medium">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p class="text-xs text-gold tracking-widest uppercase mt-0.5">Administrator</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-gold to-yellow-600 flex items-center justify-center text-black font-bold shadow-[0_0_15px_rgba(212,175,55,0.4)]">{{ request.user.username|upper|slice:":2" }}</div>
+                </div>
+            </header>
+
+            <!-- Content Area Scrollable -->
+            <div x-data="bookingApp()" x-init="init()" class="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth relative">
+                <div class="max-w-6xl mx-auto pb-20">
+
+                    <!-- Top Action Bar -->
+                    <div class="flex items-center justify-end gap-3 mt-6">
+                        {% if request.user.is_staff %}
+                        <button @click.stop="fetchDateDetails(selectedDate)" class="px-4 py-2 bg-white/5 text-white rounded-lg hover:bg-white/10">View Bookings</button>
+                        <button @click.stop="openAdminCreateBooking()" class="px-4 py-2 bg-gold text-black rounded-lg hover:brightness-95">Add Booking</button>
+                        <button @click.stop="toggleBlockDate(selectedDate)" class="px-4 py-2 bg-yellow-600 text-black rounded-lg hover:brightness-95">Block/Unblock Date</button>
+                        <button @click.stop="openBlockRangeModal()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:brightness-95">Block Range</button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Availability Section -->
+                    <div class="glass rounded-2xl p-6 mt-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-white">Availability Control</h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="col-span-2 space-y-6">
+                                <!-- Calendar (copied UI) -->
+                                <div class="glass rounded-2xl p-8">
+                                    <h2 class="text-3xl font-bold mb-6 text-gold">Select Date</h2>
+                                    <div class="flex items-center justify-between mb-6">
+                                        <button @click="prevMonth()" class="p-2 hover:bg-gold/10 rounded-lg transition-colors"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                                        <h3 class="text-xl font-semibold" x-text="currentMonthName"></h3>
+                                        <button @click="nextMonth()" class="p-2 hover:bg-gold/10 rounded-lg transition-colors"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                                    </div>
+
+                                    <!-- Stats cards -->
+                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                                        <div class="bg-[#0b0b0b] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                            <div>
+                                                <div class="text-[10px] uppercase tracking-wider text-gray-400">Total</div>
+                                                <div @click="openTotalBookings()" class="cursor-pointer text-xl font-bold text-white" x-text="stats.totalBookings">0</div>
+                                            </div>
+                                            <i data-lucide="calendar" class="w-5 h-5 text-white/40"></i>
+                                        </div>
+
+                                        <div class="bg-[#0b0b0b] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                            <div>
+                                                <div class="text-[10px] uppercase tracking-wider text-gray-400">Pending</div>
+                                                <div @click="openPendingBookings()" class="cursor-pointer text-xl font-bold text-yellow-500" x-text="stats.pendingBookings">0</div>
+                                            </div>
+                                            <i data-lucide="clock" class="w-5 h-5 text-yellow-500/40"></i>
+                                        </div>
+
+                                        <div class="bg-[#0b0b0b] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                            <div>
+                                                <div class="text-[10px] uppercase tracking-wider text-gray-400">Confirmed</div>
+                                                <div @click="openConfirmedBookings()" class="cursor-pointer text-xl font-bold text-green-500" x-text="stats.confirmedBookings">0</div>
+                                            </div>
+                                            <i data-lucide="check-circle" class="w-5 h-5 text-green-500/40"></i>
+                                        </div>
+
+                                        <div class="bg-[#0b0b0b] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                            <div>
+                                                <div class="text-[10px] uppercase tracking-wider text-gray-400">Blocked</div>
+                                                <div @click="openBlockedDates()" class="cursor-pointer text-xl font-bold text-red-500" x-text="stats.blockedDates">0</div>
+                                            </div>
+                                            <i data-lucide="slash" class="w-5 h-5 text-red-500/40"></i>
+                                        </div>
+
+                                        <div class="bg-[#0b0b0b] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                            <div>
+                                                <div class="text-[10px] uppercase tracking-wider text-gray-400">Available</div>
+                                                <div @click="openAvailableDates()" class="cursor-pointer text-xl font-bold text-blue-400" x-text="stats.availableDates">0</div>
+                                            </div>
+                                            <i data-lucide="calendar-plus" class="w-5 h-5 text-blue-400/40"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-7 gap-2 mb-2 text-center text-sm font-semibold text-gray-400">
+                                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                                    </div>
+
+                                    <div class="grid grid-cols-7 gap-2">
+                                        <template x-for="dayInfo in calendarDays" :key="dayInfo.day">
+                                            <button @click.prevent="handleDateClick(dayInfo)" x-text="dayInfo.day"
+                                                :disabled="dayInfo.isPast || !dayInfo.isAvailable"
+                                                :class="{
+                                                    'bg-gold/20 border-2 border-gold text-gold': selectedDate === dayInfo.dateStr,
+                                                    'bg-red-500/20 border border-red-500/50 text-red-400 cursor-not-allowed': !dayInfo.isPast && !dayInfo.isAvailable && dayInfo.status === 'booked',
+                                                    'bg-yellow-500/20 border border-yellow-500/50 text-yellow-300 cursor-not-allowed': !dayInfo.isPast && !dayInfo.isAvailable && dayInfo.status === 'blocked',
+                                                    'bg-green-700/10 border border-green-600 text-green-300 hover:bg-green-700/20': !dayInfo.isPast && dayInfo.isAvailable && selectedDate !== dayInfo.dateStr,
+                                                    'bg-gray-900 opacity-30 cursor-not-allowed': dayInfo.isPast
+                                                }"
+                                                class="p-3 rounded transition-all duration-300 font-medium relative group"
+                                                :title="dayInfo.isAvailable ? 'Available' : (dayInfo.status === 'booked' ? 'Fully Booked' : `Not Available: ${dayInfo.reason || 'Blocked'}`)">
+                                                <span x-show="!dayInfo.isAvailable && dayInfo.status === 'blocked'" class="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full"></span>
+                                                <span x-show="!dayInfo.isAvailable && dayInfo.status === 'booked'" class="absolute -top-1 -right-1 w-2 h-2 bg-red-400 rounded-full"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+
+                                    <div class="mt-6 flex flex-wrap gap-4 text-xs justify-center">
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 bg-green-700/10 border border-green-600 rounded"></div><span>Available</span></div>
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 bg-gold/20 border-2 border-gold rounded"></div><span>Selected</span></div>
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 bg-red-500/20 border border-red-500/50 rounded relative"><span class="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-400 rounded-full"></span></div><span>Fully Booked</span></div>
+                                        <div class="flex items-center gap-2"><div class="w-3 h-3 bg-yellow-500/20 border border-yellow-500/50 rounded relative"><span class="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-yellow-400 rounded-full"></span></div><span>Not Available</span></div>
+                                    </div>
+
+                                    <!-- Admin actions removed from here; controls are at the top of the page -->
+                                </div>
+
+                                <!-- Time slots block -->
+                                <div class="glass rounded-2xl p-8" x-show="selectedDate">
+                                    <h2 class="text-3xl font-bold mb-6 text-gold">Available Time Slots</h2>
+                                    <div x-show="!selectedService.id" class="text-center text-gray-400 py-8">
+                                        <p>Please select a service first to see available time slots</p>
+                                    </div>
+                                    <div x-show="selectedService.id" class="grid grid-cols-3 md:grid-cols-5 gap-3">
+                                        <button @click="selectSlot('09:00 AM')" :class="selectedTimeSlot === '09:00 AM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'" class="p-3 rounded transition-all duration-300 font-medium">09:00 AM</button>
+                                        <button @click="selectSlot('10:00 AM')" :class="selectedTimeSlot === '10:00 AM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'" class="p-3 rounded transition-all duration-300 font-medium">10:00 AM</button>
+                                        <button @click="selectSlot('11:00 AM')" :class="selectedTimeSlot === '11:00 AM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'" class="p-3 rounded transition-all duration-300 font-medium">11:00 AM</button>
+                                        <button @click="selectSlot('12:00 PM')" :class="selectedTimeSlot === '12:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'" class="p-3 rounded transition-all duration-300 font-medium">12:00 PM</button>
+                                        <button @click="selectSlot('01:00 PM')" :class="selectedTimeSlot === '01:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'" class="p-3 rounded transition-all duration-300 font-medium">01:00 PM</button>
+                                        <button @click="selectSlot('02:00 PM')" :class="selectedTimeSlot === '02:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'" class="p-3 rounded transition-all duration-300 font-medium">02:00 PM</button>
+                                        <button @click="selectSlot('03:00 PM')" :class="selectedTimeSlot === '03:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'" class="p-3 rounded transition-all duration-300 font-medium">03:00 PM</button>
+                                        <button @click="selectSlot('04:00 PM')" :class="selectedTimeSlot === '04:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'" class="p-3 rounded transition-all duration-300 font-medium">04:00 PM</button>
+                                        <button @click="selectSlot('05:00 PM')" :class="selectedTimeSlot === '05:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'" class="p-3 rounded transition-all duration-300 font-medium">05:00 PM</button>
+                                    </div>
+                                    <div x-show="loading" class="text-center text-gray-400 py-8"><div class="inline-block spinner mr-2"></div><p>Loading available time slots...</p></div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column removed: Booking Summary and form (moved to admin modals) -->
+                            <div class="space-y-8" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    function bookingApp() {
+        return {
+            mobileMenu: false,
+            loading: false,
+            selectedService: {},
+            selectedDate: '',
+            selectedTimeSlot: '',
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear(),
+            currentMonthName: '',
+            calendarDays: [],
+            availabilityData: [],
+            bookingForm: { name: '', email: '', phone: '', location: '', message: '' },
+            showConfirmModal: false,
+            toast: { show:false, message:'', type:'success' },
+            init() { this.updateMonth(); this.loadAvailability(); this.generateCalendar(); lucide.createIcons(); },
+            stats: { totalBookings: 0, pendingBookings: 0, confirmedBookings: 0, blockedDates: 0, availableDates: 0 },
+            async loadAvailability() { 
+                try { 
+                    const response = await fetch(`/api/calendar-availability/?year=${this.currentYear}&month=${this.currentMonth + 1}`); 
+                    const data = await response.json(); 
+                    if(data.calendar_data){ 
+                        const arr = []; 
+                        for(const [date, info] of Object.entries(data.calendar_data)){ 
+                            arr.push({ date: date, available: !!info.available, status: info.status || (info.available ? 'available' : 'booked'), reason: info.reason || '', booked_count: info.booked_count || 0 }); 
+                        } 
+                        this.availabilityData = arr; 
+                    }
+                    if(data.stats){
+                        this.stats.totalBookings = data.stats.total_bookings;
+                        this.stats.pendingBookings = data.stats.pending_bookings;
+                        this.stats.confirmedBookings = data.stats.confirmed_bookings;
+                        this.stats.blockedDates = data.stats.blocked_dates;
+                        this.stats.availableDates = data.stats.available_dates;
+                    }
+                } catch (error) { 
+                    console.error('Error loading availability:', error); 
+                } 
+                this.generateCalendar(); 
+            },
+            updateMonth() { const months = ["January","February","March","April","May","June","July","August","September","October","November","December"]; this.currentMonthName = months[this.currentMonth] + " " + this.currentYear; },
+            generateCalendar() { const totalDays = new Date(this.currentYear,this.currentMonth+1,0).getDate(); this.calendarDays = []; const today = new Date(); today.setHours(0,0,0,0); for(let i=1;i<=totalDays;i++){ const currentDate = new Date(this.currentYear,this.currentMonth,i); const isPast = currentDate < today; const dateStr = `${this.currentYear}-${String(this.currentMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const availability = this.availabilityData.find(a=>a.date===dateStr); let isAvailable=true,status='available',reason=''; if(availability){ isAvailable=availability.available; status=availability.status; reason=availability.reason; } this.calendarDays.push({ day:i,isPast:isPast,dateStr:dateStr,isAvailable:isAvailable,status:status,reason:reason }); } },
+            updateStats(){ 
+                // Stats are now fetched from server
+            },
+            prevMonth(){ this.currentMonth--; if(this.currentMonth<0){ this.currentMonth=11; this.currentYear--; } this.updateMonth(); this.loadAvailability(); },
+            nextMonth(){ this.currentMonth++; if(this.currentMonth>11){ this.currentMonth=0; this.currentYear++; } this.updateMonth(); this.loadAvailability(); },
+            selectDate(day){ this.selectedDate = `${this.currentYear}-${String(this.currentMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; },
+            // Admin state
+            dateBookings: [],
+            dateAvailability: null,
+            selectedBooking: null,
+            adminForm: { name:'', email:'', phone:'', service_id:'', event_date:'', time_slot:'', location:'', message:'' },
+            listItems: [],
+            selectedListTitle: '',
+
+            // Admin helpers
+            async fetchDateDetails(dateStr){ 
+                if(!dateStr) return; 
+                try{ 
+                    const resp = await fetch(`/api/date-details/?date=${dateStr}`); 
+                    const data = await resp.json(); 
+                    this.dateBookings = data.bookings || []; 
+                    this.dateAvailability = data.availability || null;
+                    document.getElementById('dateBookingsModal')?.classList.remove('hidden'); 
+                    this.$nextTick(() => lucide.createIcons());
+                }catch(e){ 
+                    console.error('Error fetching date details',e); 
+                    alert('Failed to load details'); 
+                } 
+            },
+            async fetchAdminEvents(){ try{ const resp = await fetch('/api/admin/calendar-events/'); const data = await resp.json(); return data.events || []; }catch(e){ console.error('Error fetching admin events', e); return []; } },
+            async openTotalBookings(){ const events = await this.fetchAdminEvents(); const bookings = events.filter(ev=>ev.extendedProps && ev.extendedProps.type === 'booking').map(ev=>({ id: ev.extendedProps.booking_id || ev.id, title: ev.title, subtitle: ev.start, raw: ev })); this.listItems = bookings; this.selectedListTitle = 'Total Bookings'; document.getElementById('listModal')?.classList.remove('hidden'); },
+            async openPendingBookings(){ const events = await this.fetchAdminEvents(); const bookings = events.filter(ev=>ev.extendedProps && ev.extendedProps.type === 'booking' && ev.extendedProps.status === 'pending').map(ev=>({ id: ev.extendedProps.booking_id || ev.id, title: ev.title, subtitle: ev.start, raw: ev })); this.listItems = bookings; this.selectedListTitle = 'Pending Bookings'; document.getElementById('listModal')?.classList.remove('hidden'); },
+            async openConfirmedBookings(){ const events = await this.fetchAdminEvents(); const bookings = events.filter(ev=>ev.extendedProps && ev.extendedProps.type === 'booking' && (ev.extendedProps.status === 'confirmed' || ev.extendedProps.status === 'approved')).map(ev=>({ id: ev.extendedProps.booking_id || ev.id, title: ev.title, subtitle: ev.start, raw: ev })); this.listItems = bookings; this.selectedListTitle = 'Confirmed Bookings'; document.getElementById('listModal')?.classList.remove('hidden'); },
+            async openAvailableDates(){
+                const available = this.calendarDays.filter(d => d.isAvailable && !d.isPast).map(d => ({
+                    id: d.dateStr,
+                    title: 'Available Date',
+                    subtitle: d.dateStr,
+                    raw: d.dateStr
+                }));
+                this.listItems = available;
+                this.selectedListTitle = 'Available Dates (This Month)';
+                document.getElementById('listModal')?.classList.remove('hidden');
+            },
+            async openBlockedDates(){ const events = await this.fetchAdminEvents(); const blocks = events.filter(ev=>ev.extendedProps && (ev.extendedProps.type === 'block' || ev.extendedProps.type === 'availability')).map(ev=>({ id: ev.extendedProps.block_id || ev.id, title: ev.title || 'Blocked', subtitle: ev.start + (ev.end?(' → '+ev.end):''), raw: ev })); this.listItems = blocks; this.selectedListTitle = 'Blocked Dates'; document.getElementById('listModal')?.classList.remove('hidden'); },
+            focusListItem(item){ 
+                if(!item || !item.raw) return; 
+                const date = item.raw.start || item.raw.startStr || item.raw; 
+                this.selectedDate = date; 
+                const d = new Date(date); 
+                this.currentMonth = d.getMonth(); 
+                this.currentYear = d.getFullYear(); 
+                this.updateMonth(); 
+                this.loadAvailability(); 
+                document.getElementById('listModal')?.classList.add('hidden'); 
+                if(item.raw.extendedProps && item.raw.extendedProps.type === 'booking'){ 
+                    const bookingId = item.raw.extendedProps.booking_id; 
+                    if(bookingId) this.openBookingDetail(bookingId); 
+                    else this.fetchDateDetails(date); 
+                } else if(item.raw.extendedProps && (item.raw.extendedProps.type === 'block' || item.raw.extendedProps.type === 'availability')){ 
+                    this.fetchDateDetails(date); 
+                }
+            },
+            handleDateClick(dayInfo){ if(!dayInfo || dayInfo.isPast) return; this.selectedDate = dayInfo.dateStr; if(!dayInfo.isAvailable){ // show bookings/block details
+                    this.fetchDateDetails(dayInfo.dateStr); } else { this.selectDate(dayInfo.day); } },
+            openAdminCreateBooking(){ if(!this.selectedDate){ alert('Select a date first'); return; } this.adminForm = { id: null, name:'', email:'', phone:'', service_id:'', event_date:this.selectedDate, time_slot:'', location:'', message:'' }; document.getElementById('adminBookingModal')?.classList.remove('hidden'); },
+            openEditBooking(booking){
+                this.adminForm = {
+                    id: booking.id,
+                    name: booking.name,
+                    email: booking.email,
+                    phone: booking.phone,
+                    service_id: booking.service_id,
+                    event_date: booking.event_date,
+                    time_slot: booking.time_slot,
+                    location: booking.location,
+                    message: booking.message || booking.admin_notes || ''
+                };
+                document.getElementById('bookingDetailModal')?.classList.add('hidden');
+                document.getElementById('adminBookingModal')?.classList.remove('hidden');
+            },
+            async adminCreateBooking(){ 
+                const isEdit = !!this.adminForm.id;
+                const url = isEdit ? `/api/admin/bookings/${this.adminForm.id}/update/` : '/api/admin/bookings/';
+                try{ 
+                    const resp = await fetch(url, { 
+                        method:'POST', 
+                        headers:{ 'Content-Type':'application/json','X-CSRFToken': this.getCsrfToken() }, 
+                        body: JSON.stringify(this.adminForm) 
+                    }); 
+                    const data = await resp.json(); 
+                    if(data.success){ 
+                        this.showNotification(isEdit ? 'Booking updated' : 'Booking created','success'); 
+                        this.loadAvailability(); 
+                        document.getElementById('adminBookingModal')?.classList.add('hidden'); 
+                    } else { 
+                        this.showNotification(data.error||'Failed','error'); 
+                    } 
+                }catch(e){ 
+                    console.error(e); 
+                    this.showNotification(`Failed to ${isEdit?'update':'create'} booking`,'error'); 
+                } 
+            },
+            async openBookingDetail(bookingId){ try{ const resp = await fetch(`/api/admin/bookings/${bookingId}/`); const data = await resp.json(); this.selectedBooking = data.booking || null; document.getElementById('bookingDetailModal')?.classList.remove('hidden'); }catch(e){ console.error(e); alert('Failed to fetch booking'); } },
+            async adminUpdateBooking(bookingId, payload){ try{ const resp = await fetch(`/api/admin/bookings/${bookingId}/update/`, { method:'POST', headers:{ 'Content-Type':'application/json','X-CSRFToken': this.getCsrfToken() }, body: JSON.stringify(payload) }); const data = await resp.json(); if(data.success){ this.showNotification('Updated','success'); this.loadAvailability(); document.getElementById('bookingDetailModal')?.classList.add('hidden'); } else { this.showNotification(data.error||'Failed','error'); } }catch(e){ console.error(e); this.showNotification('Update failed','error'); } },
+            async adminCancelBooking(bookingId){ if(!confirm('Cancel this booking?')) return; try{ const resp = await fetch(`/api/admin/bookings/${bookingId}/cancel/`, { method:'POST', headers:{ 'X-CSRFToken': this.getCsrfToken() } }); const data = await resp.json(); if(data.success){ this.showNotification('Cancelled','success'); this.loadAvailability(); document.getElementById('bookingDetailModal')?.classList.add('hidden'); } else this.showNotification(data.error||'Failed','error'); }catch(e){ console.error(e); this.showNotification('Cancel failed','error'); } },
+            async adminMarkComplete(bookingId){ try{ const resp = await fetch(`/api/admin/bookings/${bookingId}/complete/`, { method:'POST', headers:{ 'X-CSRFToken': this.getCsrfToken() } }); const data = await resp.json(); if(data.success){ this.showNotification('Marked complete','success'); this.loadAvailability(); document.getElementById('bookingDetailModal')?.classList.add('hidden'); } else this.showNotification(data.error||'Failed','error'); }catch(e){ console.error(e); this.showNotification('Operation failed','error'); } },
+            async toggleBlockDate(dateStr){ if(!dateStr){ alert('Select a date first'); return; } try{ const resp = await fetch('/api/admin/blocks/toggle/', { method:'POST', headers:{ 'Content-Type':'application/json','X-CSRFToken': this.getCsrfToken() }, body: JSON.stringify({ date: dateStr }) }); const data = await resp.json(); if(data.success){ this.showNotification(data.message||'Updated block','success'); this.loadAvailability(); } else this.showNotification(data.error||'Failed','error'); }catch(e){ console.error(e); this.showNotification('Block failed','error'); } },
+            openBlockRangeModal(){ document.getElementById('blockRangeModal')?.classList.remove('hidden'); },
+            async createBlockRange(payload){ try{ const resp = await fetch('/api/admin/blocks/', { method:'POST', headers:{ 'Content-Type':'application/json','X-CSRFToken': this.getCsrfToken() }, body: JSON.stringify(payload) }); const data = await resp.json(); if(data.success){ this.showNotification('Blocked range','success'); this.loadAvailability(); document.getElementById('blockRangeModal')?.classList.add('hidden'); } else this.showNotification(data.error||'Failed','error'); }catch(e){ console.error(e); this.showNotification('Failed','error'); } },
+            selectService(id,title,price){ this.selectedService={id:id,title:title,price:price}; },
+            selectSlot(slot){ this.selectedTimeSlot = slot; },
+            scrollToBooking(){ const el=document.getElementById('booking-section'); if(el) el.scrollIntoView({ behavior: 'smooth' }); },
+            async submitBooking(){ if(!this.selectedService.id){ this.showNotification('Please select a service','error'); return; } if(!this.selectedDate){ this.showNotification('Please select a date','error'); return; } if(!this.selectedTimeSlot){ this.showNotification('Please select a time slot','error'); return; } if(!this.bookingForm.name||!this.bookingForm.email){ this.showNotification('Please fill in your name and email','error'); return; } this.loading=true; try{ const response = await fetch('/api/create-booking/', { method:'POST', headers:{ 'Content-Type':'application/json','X-CSRFToken': this.getCsrfToken() }, body: JSON.stringify({ name:this.bookingForm.name,email:this.bookingForm.email,phone:this.bookingForm.phone,service_id:this.selectedService.id,event_date:this.selectedDate,time_slot:this.selectedTimeSlot,location:this.bookingForm.location,message:this.bookingForm.message }) }); const data = await response.json(); if(data.success){ this.showNotification('Booking confirmed successfully! Redirecting...','success'); setTimeout(()=>{ window.location.href = '/booking/success/'; },2000); } else { this.showNotification(data.error||'Booking failed','error'); } }catch(e){ console.error('Error creating booking:',e); this.showNotification('Error creating booking','error'); } finally{ this.loading=false; } },
+            getCsrfToken(){ const cookie = document.cookie.split('; ').find(row=>row.trim().startsWith('csrftoken=')); return cookie?cookie.split('=')[1]:''; },
+            showNotification(message,type='success'){ const notification = document.createElement('div'); notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-all duration-500 ${ type==='success' ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-2 border-green-400' : 'bg-gradient-to-r from-red-500 to-pink-600 text-white border-2 border-red-400' }`; notification.innerHTML = `<div class="flex items-center space-x-3"><div class="flex-shrink-0">${ type==='success' ? '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' }</div><div class="flex-1"><p class="font-semibold">${type==='success'?'Success!':'Error'}</p><p class="text-sm opacity-90">${message}</p></div><button onclick="this.parentElement.parentElement.remove()" class="flex-shrink-0 ml-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div>`; document.body.appendChild(notification); setTimeout(()=>{ if(notification.parentElement) notification.remove(); },5000); }
+        };
+    }
+    </script>
+
+</body>
+</html>

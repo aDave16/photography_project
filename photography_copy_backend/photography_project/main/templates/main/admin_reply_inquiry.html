@@ -1,0 +1,147 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Reply to Inquiry: {{ inquiry.full_name }} | Dhrumil's Films Admin{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Reply to Inquiry #{{ inquiry.id }}</h2>
+                    <p class="text-muted">From: <strong>{{ inquiry.full_name }}</strong> ({{ inquiry.email }})</p>
+                    <p class="text-muted">Event: {{ inquiry.get_event_type_display }}</p>
+                    {% if inquiry.preferred_date %}
+                    <p class="text-muted">Preferred Date: {{ inquiry.preferred_date|date:"F d, Y" }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="reply_message">Reply Message</label>
+                            <textarea name="reply_message" id="reply_message" class="form-control" rows="8" required>{{ inquiry.admin_reply|default:"" }}</textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Send Reply & Email Customer
+                            </button>
+                            <a href="{% url 'admin:main_inquiry' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                Back to Inquiries
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .card-header {
+        background: #f8f9fa;
+        padding: 20px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .card-header h2 {
+        margin: 0 0 10px 0;
+        color: #495057;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .card-header p {
+        margin: 5px 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .card-body {
+        padding: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+    
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        outline: none;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+    
+    .text-muted {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Create Service | Dhrumil Bajak Photography{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 16px;
+        padding: 30px;
+        max-width: 720px;
+        margin: 0 auto;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--gold);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+    }
+
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 8px;
+        padding: 12px 15px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+    }
+
+    .form-textarea { min-height: 100px; resize: vertical; }
+
+    .btn-primary {
+        background: var(--gold);
+        color: var(--dark-bg);
+        padding: 12px 30px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--gold);
+        padding: 10px 20px;
+        border: 1px solid var(--gold);
+        border-radius: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="glass p-8">
+    <div class="max-w-3xl mx-auto">
+        <h2 class="text-3xl font-semibold text-gold mb-8">Create New Service</h2>
+
+        <form method="POST" action="{% url 'dashboard_create_service' %}" enctype="multipart/form-data" class="form-container">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label" for="title">Service Title</label>
+                <input type="text" name="title" id="title" required class="form-input" placeholder="Enter service title...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="service_type">Service Type</label>
+                <select name="service_type" id="service_type" class="form-select">
+                    <option value="wedding">Wedding</option>
+                    <option value="pre-wedding">Pre-Wedding</option>
+                    <option value="portrait">Portrait</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="baby-shower">Baby Shower</option>
+                    <option value="birthday">Birthday</option>
+                    <option value="event">Event</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label class="form-label" for="price">Price</label>
+                    <input type="number" name="price" id="price" step="0.01" required class="form-input" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="price_note">Price Note</label>
+                    <input type="text" name="price_note" id="price_note" class="form-input" placeholder="Starting from">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="tagline">Tagline</label>
+                <input type="text" name="tagline" id="tagline" class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="short_description">Short Description</label>
+                <textarea name="short_description" id="short_description" rows="3" class="form-textarea"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="full_description">Full Description</label>
+                <textarea name="full_description" id="full_description" rows="5" class="form-textarea"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">Description (required)</label>
+                <textarea name="description" id="description" rows="4" required class="form-textarea" placeholder="Main service description..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="duration">Duration</label>
+                <input type="text" name="duration" id="duration" class="form-input" placeholder="e.g. 3 Hour Session">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="features">Features (one per line)</label>
+                <textarea name="features" id="features" rows="5" class="form-textarea" placeholder="Feature 1&#10;Feature 2"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="display_order">Display Order</label>
+                <input type="number" name="display_order" id="display_order" min="0" value="0" class="form-input">
+            </div>
+
+            <div class="form-group flex gap-8">
+                <label class="checkbox-row">
+                    <input type="checkbox" name="is_featured">
+                    Featured
+                </label>
+                <label class="checkbox-row">
+                    <input type="checkbox" name="is_active" checked>
+                    Active
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="image">Card Image</label>
+                <input type="file" name="image" id="image" accept="image/*" class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="cover_image">Cover Image</label>
+                <input type="file" name="cover_image" id="cover_image" accept="image/*" class="form-input">
+            </div>
+
+            <div class="flex gap-4">
+                <button type="submit" class="btn-primary">Create Service</button>
+                <a href="{% url 'admin_services' %}" class="btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>We Received Your Inquiry | Dhrumil's Films</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .email-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #D4AF37;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+        
+        .email-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+        
+        .email-content {
+            margin-bottom: 30px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 1.1rem;
+            color: #D4AF37;
+            font-weight: 600;
+        }
+        
+        .message-box {
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .message-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+        }
+        
+        .message-content {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        
+        .email-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        
+        .footer-text {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 10px;
+        }
+        
+        .signature {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: #D4AF37;
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 20px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="email-header">
+            <div class="logo">Dhrumil's Films</div>
+            <h1 class="email-title">We Received Your Inquiry</h1>
+        </div>
+        
+        <!-- Content -->
+        <div class="email-content">
+            <p>Dear <strong>{{ full_name }}</strong>,</p>
+            
+            <p>Thank you for reaching out to Dhrumil's Films. We've successfully received your inquiry and our team is excited to work with you!</p>
+            
+            <!-- Inquiry Details -->
+            <div class="detail-row">
+                <span class="detail-label">Event Type</span>
+                <span class="detail-value">{{ event_type }}</span>
+            </div>
+            
+            {% if preferred_date %}
+            <div class="detail-row">
+                <span class="detail-label">Preferred Date</span>
+                <span class="detail-value">{{ preferred_date|date:"F d, Y" }}</span>
+            </div>
+            {% endif %}
+            
+            {% if location %}
+            <div class="detail-row">
+                <span class="detail-label">Location</span>
+                <span class="detail-value">{{ location }}</span>
+            </div>
+            {% endif %}
+            
+            <!-- Message -->
+            <div class="message-box">
+                <div class="message-label">Your Message</div>
+                <div class="message-content">{{ message|linebreaks }}</div>
+            </div>
+            
+            <p>Our team will carefully review your requirements and contact you within <strong>24 hours</strong> to discuss your vision in detail.</p>
+            
+            <p>We're committed to creating a cinematic photography experience that exceeds your expectations and captures your special moments beautifully.</p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="email-footer">
+            <p class="footer-text">With passion and creativity,<br>Your Dhrumil's Films Team</p>
+            <p class="signature">Crafting Legacies Through Light</p>
+        </div>
+    </div>
+</body>
+</html>

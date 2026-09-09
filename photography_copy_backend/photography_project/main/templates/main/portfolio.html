@@ -1,0 +1,359 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio | Dhrumil Bajak Wedding Photography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'css/cinematic.css' %}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #080808;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .portfolio-filter-bar {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .portfolio-filter-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .portfolio-card img {
+            will-change: transform;
+        }
+
+        .portfolio-title-clamp {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            overflow: hidden;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#080808',
+                        charcoal: '#111111',
+                        gold: '#D4AF37',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="cursor-none" x-data="{ mobileMenu: false, scrolled: false }"
+    x-on:scroll.window="scrolled = window.pageYOffset > 50">
+    {% csrf_token %}
+    <div id="cursor" class="custom-cursor hidden md:block"></div>
+
+    <nav
+        class="fixed w-full z-50 bg-dark/90 backdrop-blur-xl py-4 border-b border-gold/10 transition-all duration-700 ease-in-out px-6 md:px-12 flex justify-between items-center">
+        <a href="{% url 'home' %}" class="text-2xl font-light tracking-[0.3em] uppercase playfair group">
+            Dhrumil <span class="text-gold transition-all duration-500 group-hover:tracking-[0.5em]">Bajak</span>
+        </a>
+
+        <div class="hidden md:flex space-x-12 text-[10px] uppercase tracking-[0.4em] font-light">
+            <a href="{% url 'home' %}" class="nav-link hover:text-gold transition-colors">Home</a>
+            <a href="{% url 'portfolio' %}" class="nav-link text-gold">Portfolio</a>
+            <a href="{% url 'about' %}" class="nav-link hover:text-gold transition-colors">About</a>
+            <a href="{% url 'services' %}" class="nav-link hover:text-gold transition-colors">Services</a>
+            <a href="{% url 'booking' %}"
+                class="nav-link text-white font-semibold hover:text-gold transition-colors">Book Session</a>
+            <a href="{% url 'contact' %}" class="nav-link hover:text-gold transition-colors">Contact</a>
+        </div>
+
+        <!-- Mobile Toggle Button -->
+        <button @click="mobileMenu = !mobileMenu"
+            class="md:hidden text-white hover:text-gold transition-colors w-10 h-10 flex items-center justify-center"
+            aria-label="Toggle menu">
+            <!-- Hamburger Menu Icon (3 bars) -->
+            <div x-show="!mobileMenu" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 rotate-90" x-transition:enter-end="opacity-100 rotate-0"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 rotate-0"
+                x-transition:leave-end="opacity-0 -rotate-90" class="flex flex-col items-center justify-center gap-1.5">
+                <span class="w-6 h-0.5 bg-current transition-all duration-300"></span>
+                <span class="w-6 h-0.5 bg-current transition-all duration-300"></span>
+                <span class="w-6 h-0.5 bg-current transition-all duration-300"></span>
+            </div>
+
+            <!-- Close Icon (X) -->
+            <div x-show="mobileMenu" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 rotate-90" x-transition:enter-end="opacity-100 rotate-0"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 rotate-0"
+                x-transition:leave-end="opacity-0 -rotate-90" class="flex items-center justify-center">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </div>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu Dropdown -->
+    <div x-show="mobileMenu" x-transition:enter="transition ease-out duration-500"
+        x-transition:enter-start="opacity-0 translate-y-[-100%]" x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-400" x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-[-100%]" @click.outside="mobileMenu = false"
+        class="fixed inset-0 bg-dark z-40 flex flex-col items-center justify-center space-y-10 text-xl uppercase tracking-[0.25em] font-light"
+        x-cloak>
+        <a @click="mobileMenu = false" href="{% url 'home' %}"
+            class="hover:text-gold transition-colors cursor-pointer">Home</a>
+        <a @click="mobileMenu = false" href="{% url 'portfolio' %}"
+            class="text-gold hover:text-white transition-colors cursor-pointer">Portfolio</a>
+        <a @click="mobileMenu = false" href="{% url 'about' %}"
+            class="hover:text-gold transition-colors cursor-pointer">About</a>
+        <a @click="mobileMenu = false" href="{% url 'services' %}"
+            class="hover:text-gold transition-colors cursor-pointer">Services</a>
+        <a @click="mobileMenu = false" href="{% url 'booking' %}"
+            class="text-white font-semibold hover:text-gold transition-colors cursor-pointer">Book Session</a>
+        <a @click="mobileMenu = false" href="{% url 'contact' %}"
+            class="hover:text-gold transition-colors cursor-pointer">Contact</a>
+
+        <!-- Mobile Booking Button -->
+        <button
+            @click="mobileMenu = false; setTimeout(() => document.getElementById('advanced-features-overlay')?.classList.remove('hidden'), 300);"
+            class="mt-6 px-8 py-4 bg-gold text-dark font-bold uppercase tracking-[0.2em] text-sm rounded-full hover:bg-white transition-all transform hover:scale-105 shadow-lg">
+            Book Now
+        </button>
+    </div>
+
+    <main class="page-wrapper min-h-screen pt-28 pb-28 px-6 md:px-12">
+        <div class="max-w-[1400px] mx-auto space-y-24">
+            <section class="portfolio-hero reveal mt-8 space-y-10">
+                <div class="max-w-3xl mx-auto text-center">
+                    <span class="uppercase tracking-[0.35em] text-gold text-[10px]">The Collection</span>
+                    <h1 class="mt-8 text-5xl md:text-7xl playfair font-light tracking-[0.18em] leading-tight">Stories
+                        told in motion and stillness.</h1>
+                    <p class="mt-6 text-white/70 leading-relaxed text-lg md:text-xl">A database-driven portfolio of
+                        categories and photographs.</p>
+                </div>
+
+                <div class="portfolio-filter-bar flex flex-nowrap items-center justify-start md:justify-center gap-3 overflow-x-auto pb-2 px-1 -mx-1 md:mx-0 md:px-0"
+                    data-portfolio-filters>
+                    <a href="{% url 'portfolio' %}" data-portfolio-filter="all"
+                        class="shrink-0 inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-2 text-[11px] uppercase tracking-[0.3em] font-medium transition-all duration-300 {% if not selected_category %}bg-gold text-dark shadow-[0_8px_30px_rgba(212,175,55,0.22)]{% else %}text-white/70 hover:text-white hover:border-gold hover:bg-white/5{% endif %}">
+                        All
+                    </a>
+                    {% for category in categories %}
+                    <a href="{% url 'portfolio' %}?category={{ category.slug }}"
+                        data-portfolio-filter="{{ category.slug }}"
+                        class="shrink-0 inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-2 text-[11px] uppercase tracking-[0.3em] font-medium transition-all duration-300 {% if selected_category == category.slug %}bg-gold text-dark shadow-[0_8px_30px_rgba(212,175,55,0.22)]{% else %}text-white/70 hover:text-white hover:border-gold hover:bg-white/5{% endif %}">
+                        {{ category.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!--<section class="reveal">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 max-w-[1600px] mx-auto" data-portfolio-grid data-portfolio-state="{{ selected_category|default:'' }}">
+                    {% for image in images %}
+                        <article class="group relative overflow-hidden rounded-xl bg-[#111] shadow-lg aspect-square">                       
+                        {% if image.image %}
+                        <img src="{{ image.image.url }}" alt="{{ image.title }}" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
+                        {% endif %}
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div class="absolute inset-0 flex items-end p-4 md:p-5 z-10">
+                            <div class="w-full translate-y-3 group-hover:translate-y-0 transition-transform duration-500 ease-out">
+                                <p class="text-[10px] md:text-[11px] tracking-[0.3em] text-gold uppercase mb-2 opacity-90">{% if image.category %}{{ image.category.name }}{% endif %}</p>
+                                <h2 class="portfolio-title-clamp text-sm md:text-lg font-light playfair tracking-wide leading-tight">{{ image.title }}</h2>
+                            </div>
+                        </div>
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500"></div>
+                        <div class="absolute inset-0 flex items-start justify-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20 pointer-events-none">
+                            <span class="rounded-full border border-white/15 bg-black/30 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-white/80 backdrop-blur-sm">View</span>
+                        </div>
+                    </article>
+                    {% empty %}
+                    <div class="text-center py-20 col-span-full">
+                        <h3 class="text-2xl text-white/70">No images found in this category</h3>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>-->
+            <section class="reveal">
+
+                <div class="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4 max-w-[1700px] mx-auto">
+
+                    {% for image in images %}
+
+                    <article
+                        class="group relative overflow-hidden rounded-xl bg-[#111] shadow-lg mb-4 break-inside-avoid">
+
+                        {% if image.image %}
+                        <img src="{{ image.image.url }}" alt="{{ image.title }}" loading="lazy" decoding="async"
+                            style="object-fit: cover;"
+                            class="w-full h-auto object-contain transition duration-300 group-hover:scale-[1.02]">
+                        {% endif %}
+
+                        <!-- Overlay -->
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300">
+                        </div>
+
+                        <!-- Info -->
+                        <div class="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm p-3">
+
+                            {% if image.category %}
+                            <p class="text-[9px] text-gold uppercase tracking-widest truncate">
+                                {{ image.category.name }}
+                            </p>
+                            {% endif %}
+
+                            <h3 class="text-white text-xs md:text-sm truncate">
+                                {{ image.title }}
+                            </h3>
+
+                        </div>
+
+                    </article>
+
+                    {% empty %}
+
+                    <div class="text-center py-20 col-span-full">
+                        <h3 class="text-xl text-white/70">
+                            No images found in this category
+                        </h3>
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <footer class="py-20 px-6 border-t border-gold/10 text-center bg-[#050505]">
+        <p class="text-[10px] uppercase tracking-[0.5em] text-white/40">&copy; 2026 Dhrumil Bajak Photography. All
+            rights reserved.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        const cursor = document.getElementById('cursor');
+        if (cursor) {
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+            document.querySelectorAll('a, button, .cursor-pointer').forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+            });
+        }
+
+        document.addEventListener('click', (event) => {
+            const link = event.target.closest('a[data-transition]');
+            if (!link) return;
+            event.preventDefault();
+            document.body.classList.add('page-transitioning');
+            const href = link.getAttribute('href');
+            if (href) {
+                setTimeout(() => window.location.href = href, 320);
+            }
+        });
+
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, observerOptions);
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        const filterBar = document.querySelector('[data-portfolio-filters]');
+        const galleryGrid = document.querySelector('[data-portfolio-grid]');
+
+        function setActiveFilter(activeSlug) {
+            if (!filterBar) return;
+            filterBar.querySelectorAll('[data-portfolio-filter]').forEach((link) => {
+                const linkSlug = link.getAttribute('data-portfolio-filter') || '';
+                const isActive = linkSlug === activeSlug || (!activeSlug && linkSlug === 'all');
+                link.classList.toggle('bg-gold', isActive);
+                link.classList.toggle('text-dark', isActive);
+                link.classList.toggle('shadow-[0_8px_30px_rgba(212,175,55,0.22)]', isActive);
+                link.classList.toggle('text-white/70', !isActive);
+                link.classList.toggle('hover:bg-white/5', !isActive);
+                link.classList.toggle('hover:text-white', !isActive);
+                link.classList.toggle('hover:border-gold', !isActive);
+            });
+        }
+
+        async function loadFilteredPortfolio(url, activeSlug) {
+            if (!galleryGrid) return;
+
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) return;
+
+            const html = await response.text();
+            const parsed = new DOMParser().parseFromString(html, 'text/html');
+            const nextGrid = parsed.querySelector('[data-portfolio-grid]');
+
+            if (nextGrid) {
+                galleryGrid.innerHTML = nextGrid.innerHTML;
+            }
+
+            galleryGrid.setAttribute('data-portfolio-state', activeSlug);
+            history.pushState({ portfolioCategory: activeSlug }, '', url);
+            setActiveFilter(activeSlug);
+        }
+
+        if (filterBar && galleryGrid) {
+            filterBar.addEventListener('click', (event) => {
+                const link = event.target.closest('a[data-portfolio-filter]');
+                if (!link) return;
+
+                const activeSlug = link.getAttribute('data-portfolio-filter') || '';
+                const currentState = galleryGrid.getAttribute('data-portfolio-state') || '';
+                const isAllLoaded = !currentState;
+
+                if (isAllLoaded) {
+                    event.preventDefault();
+
+                    const cards = Array.from(galleryGrid.querySelectorAll('[data-gallery-item]'));
+                    const nextUrl = link.getAttribute('href') || window.location.pathname;
+
+                    cards.forEach((card) => {
+                        const cardCategory = card.getAttribute('data-category') || '';
+                        const shouldShow = !activeSlug || cardCategory === activeSlug;
+                        card.classList.toggle('hidden', !shouldShow);
+                    });
+
+                    galleryGrid.setAttribute('data-portfolio-state', activeSlug);
+                    history.pushState({ portfolioCategory: activeSlug }, '', nextUrl);
+                    setActiveFilter(activeSlug);
+                    return;
+                }
+
+                event.preventDefault();
+                loadFilteredPortfolio(link.getAttribute('href') || window.location.pathname, activeSlug);
+            });
+        }
+
+        window.addEventListener('popstate', () => {
+            window.location.reload();
+        });
+    </script>
+    <script src="{% static 'js/features.js' %}"></script>
+</body>
+
+</html>

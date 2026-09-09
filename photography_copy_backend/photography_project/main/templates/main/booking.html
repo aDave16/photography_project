@@ -1,0 +1,831 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Your Session | Dhrumil Bajak Photography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,400&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{% static 'css/cinematic.css' %}">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* Glassmorphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        /* Calendar styles */
+        .calendar-day {
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day:hover:not(.disabled) {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
+        .calendar-day.selected {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #D4AF37;
+        }
+
+        .calendar-day.booked {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .calendar-day.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Time slot styles */
+        .time-slot {
+            transition: all 0.3s ease;
+        }
+
+        .time-slot:hover:not(.disabled) {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .time-slot.selected {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #D4AF37;
+        }
+
+        .time-slot.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Service card styles */
+        .service-card {
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.2);
+        }
+
+        .service-card.selected {
+            border-color: #D4AF37;
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            border-top: 2px solid #D4AF37;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast notification */
+        .toast {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-dark text-white cursor-none" x-data="bookingApp()" x-init="init()" class="cursor-none">
+    <!-- Sticky Navbar -->
+    <nav :class="scrolled ? 'bg-dark/90 backdrop-blur-xl py-4 border-b border-gold/10' : 'bg-dark py-8'"
+        class="fixed top-0 left-0 w-full z-50 transition-all duration-700 ease-in-out px-6 md:px-12 flex justify-between items-center overflow-visible">
+        <a href="{% url 'home' %}" class="flex items-end gap-4 text-xl font-light tracking-[0.15em] uppercase playfair group">
+            <span>Dhrumil <span
+                    class="text-gold transition-all duration-500 group-hover:tracking-[0.3em]">Bajak</span></span>
+        </a>
+
+        <!-- Desktop Menu -->
+        <div class="hidden md:flex space-x-12 text-[10px] uppercase tracking-[0.25em] font-light">
+            <a href="{% url 'home' %}" class="nav-link text-gold">Home</a>
+            <a href="{% url 'portfolio' %}" class="nav-link hover:text-gold transition-colors">Portfolio</a>
+            <a href="{% url 'about' %}" class="nav-link hover:text-gold transition-colors">About</a>
+            <a href="{% url 'services' %}" class="nav-link hover:text-gold transition-colors">Services</a>
+            <a href="{% url 'booking' %}" class="nav-link text-white font-semibold hover:text-gold transition-colors">Book Session</a>
+            <a href="{% url 'contact' %}" class="nav-link hover:text-gold transition-colors">Contact</a>
+        </div>
+
+        <!-- Mobile Toggle Button -->
+        <button @click="toggleMenu()" class="md:hidden text-white hover:text-gold transition-colors w-10 h-10 flex items-center justify-center" aria-label="Toggle menu">
+            <!-- Hamburger Menu Icon (3 bars) -->
+            <div x-show="!mobileMenu" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 rotate-90"
+                 x-transition:enter-end="opacity-100 rotate-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 rotate-0"
+                 x-transition:leave-end="opacity-0 -rotate-90"
+                 class="flex flex-col items-center justify-center gap-1.5">
+                <span class="w-6 h-0.5 bg-current transition-all duration-300"></span>
+                <span class="w-6 h-0.5 bg-current transition-all duration-300"></span>
+                <span class="w-6 h-0.5 bg-current transition-all duration-300"></span>
+            </div>
+            
+            <!-- Close Icon (X) -->
+            <div x-show="mobileMenu" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 rotate-90"
+                 x-transition:enter-end="opacity-100 rotate-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 rotate-0"
+                 x-transition:leave-end="opacity-0 -rotate-90"
+                 class="flex items-center justify-center">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </div>
+        </button>
+
+        <div class="nav-waves">
+            <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+                <defs>
+                    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="rgba(20, 20, 20, 0.85)" />
+                        <stop offset="45%" stop-color="rgba(212, 175, 55, 0.38)" />
+                        <stop offset="100%" stop-color="rgba(255, 215, 0, 0.12)" />
+                    </linearGradient>
+                    <path id="gentle-wave"
+                        d="M-160 44c30 0 58-10 88-10s 58 10 88 10 58-10 88-10 58 10 88 10 v44h-352z" />
+                </defs>
+                <g class="parallax-waves">
+                    <use xlink:href="#gentle-wave" x="48" y="0" fill="url(#waveGradient)" />
+                    <use xlink:href="#gentle-wave" x="48" y="3" fill="url(#waveGradient)" />
+                    <use xlink:href="#gentle-wave" x="48" y="5" fill="url(#waveGradient)" />
+                    <use xlink:href="#gentle-wave" x="48" y="7" fill="url(#waveGradient)" />
+                </g>
+            </svg>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Dropdown -->
+    <div x-show="mobileMenu" 
+        x-transition:enter="transition ease-out duration-500"
+        x-transition:enter-start="opacity-0 translate-y-[-100%]" 
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-400" 
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-[-100%]"
+        @click.outside="closeMenu()"
+        class="fixed inset-0 bg-dark z-40 flex flex-col items-center justify-center space-y-10 text-xl uppercase tracking-[0.25em] font-light"
+        x-cloak>
+        <a @click="closeMenu()" href="{% url 'home' %}" class="text-gold hover:text-white transition-colors cursor-pointer">Home</a>
+        <a @click="closeMenu()" href="{% url 'portfolio' %}" class="hover:text-gold transition-colors cursor-pointer">Portfolio</a>
+        <a @click="closeMenu()" href="{% url 'about' %}" class="hover:text-gold transition-colors cursor-pointer">About</a>
+        <a @click="closeMenu()" href="{% url 'services' %}" class="hover:text-gold transition-colors cursor-pointer">Services</a>
+        <a @click="closeMenu()" href="{% url 'booking' %}" class="text-white font-semibold hover:text-gold transition-colors cursor-pointer">Book Session</a>
+        <a @click="closeMenu()" href="{% url 'contact' %}" class="hover:text-gold transition-colors cursor-pointer">Contact</a>
+        
+        <!-- Mobile Booking Button -->
+        <button @click="closeMenu(); setTimeout(() => document.getElementById('advanced-features-overlay')?.classList.remove('hidden'), 300);" 
+            class="mt-6 px-8 py-4 bg-gold text-dark font-bold uppercase tracking-[0.2em] text-sm rounded-full hover:bg-white transition-all transform hover:scale-105 shadow-lg">
+            Book Now
+        </button>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-dark via-charcoal to-dark"></div>
+        <div class="relative z-10 text-center px-6">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-gold to-yellow-400 bg-clip-text text-transparent">
+                Book Your Session
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                Capture your precious moments with our professional photography services. 
+                Select your preferred date, time, and service to begin your journey.
+            </p>
+            <div class="flex justify-center space-x-4">
+                <button @click="scrollToBooking()" 
+                        class="bg-gold text-black px-8 py-4 rounded-full font-semibold hover:bg-yellow-400 transition-all transform hover:scale-105">
+                    Start Booking
+                </button>
+                <a href="{% url 'services' %}" 
+                   class="border border-gold text-gold px-8 py-4 rounded-full font-semibold hover:bg-gold hover:text-black transition-all">
+                    View Services
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Booking Section -->
+    <section id="booking-section" class="py-20 px-6">
+        <div class="container mx-auto max-w-7xl">
+            <div class="grid lg:grid-cols-3 gap-8">
+                
+                <!-- Left Column: Service Selection & Calendar -->
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <!-- Service Selection -->
+                    <div class="glass rounded-2xl p-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gold">Select Your Service</h2>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            {% for service in services %}
+                            <div @click="selectService({{ service.id }}, '{{ service.title }}', '{{ service.formatted_price }}')"
+                                 class="service-card glass rounded-xl p-6 cursor-pointer border border-gray-700"
+                                 :class="selectedService.id === {{ service.id }} ? 'selected' : ''">
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-12 h-12 bg-gold/20 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="camera" class="w-6 h-6 text-gold"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="text-xl font-semibold mb-2">{{ service.title }}</h3>
+                                        <p class="text-gray-400 text-sm mb-2">{{ service.get_short_description_text|truncatewords:15 }}</p>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gold font-bold">{{ service.formatted_price }}</span>
+                                            {% if service.duration %}
+                                            <span class="text-gray-500 text-sm">{{ service.duration }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Calendar -->
+                    <div class="glass rounded-2xl p-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gold">Select Date</h2>
+                        
+                        <!-- Month Navigation -->
+                        <div class="flex items-center justify-between mb-6">
+                            <button @click="prevMonth()" 
+                                    class="p-2 hover:bg-gold/10 rounded-lg transition-colors">
+                                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                            </button>
+                            <h3 class="text-xl font-semibold" x-text="currentMonthName"></h3>
+                            <button @click="nextMonth()" 
+                                    class="p-2 hover:bg-gold/10 rounded-lg transition-colors">
+                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+
+                        <!-- Calendar Grid -->
+                        <div class="grid grid-cols-7 gap-2 mb-2">
+                            <div class="text-center text-sm font-semibold text-gray-400">Sun</div>
+                            <div class="text-center text-sm font-semibold text-gray-400">Mon</div>
+                            <div class="text-center text-sm font-semibold text-gray-400">Tue</div>
+                            <div class="text-center text-sm font-semibold text-gray-400">Wed</div>
+                            <div class="text-center text-sm font-semibold text-gray-400">Thu</div>
+                            <div class="text-center text-sm font-semibold text-gray-400">Fri</div>
+                            <div class="text-center text-sm font-semibold text-gray-400">Sat</div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-2">
+                            <template x-for="dayInfo in calendarDays" :key="dayInfo.day">
+                                <button
+                                    @click="!dayInfo.isPast && dayInfo.isAvailable && selectDate(dayInfo.day)"
+                                    x-text="dayInfo.day"
+                                    :disabled="dayInfo.isPast || !dayInfo.isAvailable"
+                                    :class="{
+                                        'bg-gray-800 hover:bg-gold/10': !dayInfo.isPast && dayInfo.isAvailable && selectedDate !== dayInfo.dateStr,
+                                        'bg-gold/20 border-2 border-gold text-gold': selectedDate === dayInfo.dateStr,
+                                        'bg-red-500/20 border border-red-500/50 text-red-400 cursor-not-allowed': !dayInfo.isAvailable && dayInfo.status === 'booked',
+                                        'bg-gray-700/20 border border-gray-500 text-gray-200 cursor-not-allowed': !dayInfo.isAvailable && dayInfo.status === 'blocked',
+                                        'bg-gray-900 opacity-30 cursor-not-allowed': dayInfo.isPast
+                                    }"
+                                    class="p-3 rounded transition-all duration-300 font-medium relative group"
+                                    :title="dayInfo.isAvailable ? 'Available' : (dayInfo.status === 'booked' ? 'Fully Booked' : `Not Available: ${dayInfo.reason || 'Blocked'}`)"
+                                >
+                                    <span x-show="!dayInfo.isAvailable && dayInfo.status === 'blocked'" class="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full"></span>
+                                    <span x-show="!dayInfo.isAvailable && dayInfo.status === 'booked'" class="absolute -top-1 -right-1 w-2 h-2 bg-red-400 rounded-full"></span>
+                                </button>
+                            </template>
+                        </div>
+
+                        <!-- Calendar Legend -->
+                        <div class="mt-6 flex flex-wrap gap-4 text-xs justify-center">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-gray-800 border border-gray-600 rounded"></div>
+                                <span>Available</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-gold/20 border-2 border-gold rounded"></div>
+                                <span>Selected</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-red-500/20 border border-red-500/50 rounded relative">
+                                    <span class="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-400 rounded-full"></span>
+                                </div>
+                                <span>Fully Booked</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-yellow-500/20 border border-yellow-500/50 rounded relative">
+                                    <span class="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
+                                </div>
+                                <span>Not Available</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots -->
+                    <div class="glass rounded-2xl p-8" x-show="selectedDate">
+                        <h2 class="text-3xl font-bold mb-6 text-gold">Available Time Slots</h2>
+                        <div x-show="!selectedService.id" class="text-center text-gray-400 py-8">
+                            <p>Please select a service first to see available time slots</p>
+                        </div>
+                        <div x-show="selectedService.id" class="grid grid-cols-3 md:grid-cols-5 gap-3">
+                            <button @click="selectSlot('09:00 AM')" 
+                                    :class="selectedTimeSlot === '09:00 AM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'"
+                                    class="p-3 rounded transition-all duration-300 font-medium">09:00 AM</button>
+                            <button @click="selectSlot('10:00 AM')" 
+                                    :class="selectedTimeSlot === '10:00 AM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'"
+                                    class="p-3 rounded transition-all duration-300 font-medium">10:00 AM</button>
+                            <button @click="selectSlot('11:00 AM')" 
+                                    :class="selectedTimeSlot === '11:00 AM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'"
+                                    class="p-3 rounded transition-all duration-300 font-medium">11:00 AM</button>
+                            <button @click="selectSlot('12:00 PM')" 
+                                    :class="selectedTimeSlot === '12:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'"
+                                    class="p-3 rounded transition-all duration-300 font-medium">12:00 PM</button>
+                            <button @click="selectSlot('01:00 PM')" 
+                                    :class="selectedTimeSlot === '01:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'"
+                                    class="p-3 rounded transition-all duration-300 font-medium">01:00 PM</button>
+                            <button @click="selectSlot('02:00 PM')" 
+                                    :class="selectedTimeSlot === '02:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'"
+                                    class="p-3 rounded transition-all duration-300 font-medium">02:00 PM</button>
+                            <button @click="selectSlot('03:00 PM')" 
+                                    :class="selectedTimeSlot === '03:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'"
+                                    class="p-3 rounded transition-all duration-300 font-medium">03:00 PM</button>
+                            <button @click="selectSlot('04:00 PM')" 
+                                    :class="selectedTimeSlot === '04:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'"
+                                    class="p-3 rounded transition-all duration-300 font-medium">04:00 PM</button>
+                            <button @click="selectSlot('05:00 PM')" 
+                                    :class="selectedTimeSlot === '05:00 PM' ? 'bg-gold/20 border-2 border-gold text-gold' : 'bg-gray-800 hover:bg-gold/10'"
+                                    class="p-3 rounded transition-all duration-300 font-medium">05:00 PM</button>
+                        </div>
+                        <div x-show="loading" class="text-center text-gray-400 py-8">
+                            <div class="inline-block spinner mr-2"></div>
+                            <p>Loading available time slots...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Booking Form & Summary -->
+                <div class="space-y-8">
+                    
+                    <!-- Booking Summary -->
+                    <div class="glass rounded-2xl p-6 sticky top-24">
+                        <h3 class="text-2xl font-bold mb-4 text-gold">Booking Summary</h3>
+                        
+                        <div class="space-y-4 mb-6">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                <span class="text-gray-400">Service:</span>
+                                <span class="font-semibold" x-text="selectedService.title || 'Not selected'"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                <span class="text-gray-400">Date:</span>
+                                <span class="font-semibold" x-text="selectedDate || 'Not selected'"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                <span class="text-gray-400">Time:</span>
+                                <span class="font-semibold" x-text="selectedTimeSlot || 'Not selected'"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2">
+                                <span class="text-gray-400">Price:</span>
+                                <span class="text-xl font-bold text-gold" x-text="selectedService.price || '—'"></span>
+                            </div>
+                        </div>
+
+                        <!-- Booking Form -->
+                        <form @submit.prevent="submitBooking()" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Full Name *</label>
+                                <input type="text" x-model="bookingForm.name" required
+                                       class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:border-gold focus:outline-none transition-colors">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Email *</label>
+                                <input type="email" x-model="bookingForm.email" required
+                                       class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:border-gold focus:outline-none transition-colors">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Phone</label>
+                                <input type="tel" x-model="bookingForm.phone"
+                                       class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:border-gold focus:outline-none transition-colors">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Location</label>
+                                <input type="text" x-model="bookingForm.location" placeholder="Event location"
+                                       class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:border-gold focus:outline-none transition-colors">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Message</label>
+                                <textarea x-model="bookingForm.message" rows="3" placeholder="Any special requirements..."
+                                          class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:border-gold focus:outline-none transition-colors"></textarea>
+                            </div>
+                            
+                            <button type="button" @click="submitBooking()"
+                                    :disabled="loading"
+                                    class="w-full bg-gold text-black py-4 rounded-lg font-semibold hover:bg-yellow-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                                <div x-show="loading" class="spinner mr-2"></div>
+                                <span x-text="loading ? 'Processing...' : 'Confirm Booking'"></span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Confirmation Modal -->
+    <div x-show="showConfirmModal" x-cloak
+         class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6"
+         @click.self="showConfirmModal = false">
+        <div class="glass rounded-2xl p-8 max-w-md w-full">
+            <h3 class="text-2xl font-bold mb-4 text-gold">Confirm Your Booking</h3>
+            
+            <div class="space-y-3 mb-6">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Service:</span>
+                    <span class="font-semibold" x-text="selectedService.title"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Date:</span>
+                    <span class="font-semibold" x-text="selectedDate"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Time:</span>
+                    <span class="font-semibold" x-text="selectedTimeSlot"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Price:</span>
+                    <span class="font-bold text-gold" x-text="selectedService.price"></span>
+                </div>
+            </div>
+            
+            <div class="flex space-x-4">
+                <button @click="confirmBooking()" 
+                        class="flex-1 bg-gold text-black py-3 rounded-lg font-semibold hover:bg-yellow-400 transition-colors">
+                    Confirm
+                </button>
+                <button @click="showConfirmModal = false" 
+                        class="flex-1 border border-gold text-gold py-3 rounded-lg font-semibold hover:bg-gold hover:text-black transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div x-show="toast.show" x-cloak
+         class="fixed top-24 right-6 z-50 toast">
+        <div class="glass rounded-lg p-4 flex items-center space-x-3"
+             :class="toast.type === 'success' ? 'border-green-500' : 'border-red-500'">
+            <i :data-lucide="toast.type === 'success' ? 'check-circle' : 'x-circle'" 
+               class="w-5 h-5" :class="toast.type === 'success' ? 'text-green-500' : 'text-red-500'"></i>
+            <span x-text="toast.message"></span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-20 px-6 border-t border-gold/5 text-center space-y-10 bg-charcoal/30">
+        <div class="flex justify-center">
+            <div class="social-icon-container">
+                <a href="https://instagram.com/dhrumil_bajak" target="_blank" rel="noopener noreferrer" aria-label="Visit our Instagram"
+                    data-tooltip="Instagram" class="social-btn btn-instagram transition-all duration-500">
+                    <img src="https://cdn.simpleicons.org/instagram/white" alt="Instagram">
+                </a>
+                <a href="https://wa.me/919998001549" target="_blank" rel="noopener noreferrer" aria-label="Message us on WhatsApp"
+                    data-tooltip="WhatsApp" class="social-btn btn-whatsapp transition-all duration-500">
+                    <img src="https://cdn.simpleicons.org/whatsapp/white" alt="WhatsApp">
+                </a>
+                <a href="tel:+919998001549" aria-label="Call us" data-tooltip="Call"
+                    class="social-btn btn-call transition-all duration-500">
+                    <img src="https://img.icons8.com/ios-filled/50/ffffff/phone.png" alt="Call">
+                </a>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30">
+                &copy; 2026 Dhrumil Bajak Photography. All rights reserved.
+            </p>
+            <p class="text-[8px] uppercase tracking-[0.2em] text-gold/40 italic">
+                Crafting Legacies Through Light
+            </p>
+        </div>
+    </footer>
+
+    
+<script>
+function bookingApp() {
+    return {
+
+        mobileMenu: false,
+        loading: false,
+
+        selectedService: {},
+        selectedDate: '',
+        selectedTimeSlot: '',
+
+        currentMonth: new Date().getMonth(),
+        currentYear: new Date().getFullYear(),
+        currentMonthName: '',
+
+        calendarDays: [],
+        availabilityData: [],
+
+        bookingForm: {
+            name: '',
+            email: '',
+            phone: '',
+            location: '',
+            message: ''
+        },
+
+        init() {
+            this.updateMonth();
+            this.loadAvailability();
+            this.generateCalendar();
+
+            console.log("Booking app loaded");
+        },
+
+        async loadAvailability() {
+            try {
+                const response = await fetch(`/api/calendar-availability/?year=${this.currentYear}&month=${this.currentMonth + 1}`);
+                const data = await response.json();
+                
+                if (data.calendar_data) {
+                    // Convert mapping to array for the frontend
+                    const arr = [];
+                    for (const [date, info] of Object.entries(data.calendar_data)) {
+                        arr.push({
+                            date: date,
+                            available: !!info.available,
+                            status: info.status || (info.available ? 'available' : 'booked'),
+                            reason: info.reason || '',
+                            booked_count: info.booked_count || 0
+                        });
+                    }
+                    this.availabilityData = arr;
+                } else {
+                    this.availabilityData = data.availability || [];
+                }
+            } catch (error) {
+                console.error('Error loading availability:', error);
+                this.availabilityData = [];
+            }
+            this.generateCalendar();
+        },
+
+        updateMonth() {
+            const months = [
+                "January","February","March","April","May","June",
+                "July","August","September","October","November","December"
+            ];
+
+            this.currentMonthName =
+                months[this.currentMonth] + " " + this.currentYear;
+        },
+
+        generateCalendar() {
+
+            const totalDays = new Date(
+                this.currentYear,
+                this.currentMonth + 1,
+                0
+            ).getDate();
+
+            this.calendarDays = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for(let i = 1; i <= totalDays; i++) {
+                const currentDate = new Date(this.currentYear, this.currentMonth, i);
+                const isPast = currentDate < today;
+                
+                const dateStr = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const availability = this.availabilityData.find(a => a.date === dateStr);
+                
+                let isAvailable = true;
+                let status = 'available';
+                let reason = '';
+                
+                if (availability) {
+                    isAvailable = availability.available;
+                    status = availability.status;
+                    reason = availability.reason;
+                }
+                
+                this.calendarDays.push({
+                    day: i,
+                    isPast: isPast,
+                    dateStr: dateStr,
+                    isAvailable: isAvailable,
+                    status: status,
+                    reason: reason
+                });
+            }
+        },
+
+        prevMonth() {
+
+            this.currentMonth--;
+
+            if(this.currentMonth < 0) {
+                this.currentMonth = 11;
+                this.currentYear--;
+            }
+
+            this.updateMonth();
+            this.loadAvailability();
+        },
+
+        nextMonth() {
+
+            this.currentMonth++;
+
+            if(this.currentMonth > 11) {
+                this.currentMonth = 0;
+                this.currentYear++;
+            }
+
+            this.updateMonth();
+            this.loadAvailability();
+        },
+
+        selectDate(day) {
+            this.selectedDate = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            console.log(this.selectedDate);
+        },
+
+        selectService(id, title, price) {
+
+            this.selectedService = {
+                id: id,
+                title: title,
+                price: price
+            };
+
+            console.log(this.selectedService);
+        },
+
+        selectSlot(slot) {
+            this.selectedTimeSlot = slot;
+        },
+
+        scrollToBooking() {
+
+            const el = document.getElementById('booking-section');
+
+            if(el) {
+                el.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+        },
+
+        async submitBooking() {
+            if(!this.selectedService.id) {
+                this.showNotification("Please select a service", "error");
+                return;
+            }
+
+            if(!this.selectedDate) {
+                this.showNotification("Please select a date", "error");
+                return;
+            }
+
+            if(!this.selectedTimeSlot) {
+                this.showNotification("Please select a time slot", "error");
+                return;
+            }
+
+            if(!this.bookingForm.name || !this.bookingForm.email) {
+                this.showNotification("Please fill in your name and email", "error");
+                return;
+            }
+
+            this.loading = true;
+
+            try {
+                const response = await fetch('/api/create-booking/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        name: this.bookingForm.name,
+                        email: this.bookingForm.email,
+                        phone: this.bookingForm.phone,
+                        service_id: this.selectedService.id,
+                        event_date: this.selectedDate,
+                        time_slot: this.selectedTimeSlot,
+                        location: this.bookingForm.location,
+                        message: this.bookingForm.message
+                    })
+                });
+
+                const data = await response.json();
+
+                if(data.success) {
+                    this.showNotification("Booking confirmed successfully! Redirecting...", "success");
+                    setTimeout(() => {
+                        window.location.href = '/booking/success/';
+                    }, 2000);
+                } else {
+                    this.showNotification(data.error || "Booking failed", "error");
+                }
+            } catch(error) {
+                console.error('Error creating booking:', error);
+                this.showNotification("Error creating booking", "error");
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        getCsrfToken() {
+            const cookie = document.cookie.split('; ').find(row => row.trim().startsWith('csrftoken='));
+            return cookie ? cookie.split('=')[1] : '';
+        },
+
+        showNotification(message, type = 'success') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-all duration-500 ${
+                type === 'success' 
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-2 border-green-400' 
+                    : 'bg-gradient-to-r from-red-500 to-pink-600 text-white border-2 border-red-400'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                        ${type === 'success' 
+                            ? '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                            : '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                        }
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-semibold">${type === 'success' ? 'Success!' : 'Error'}</p>
+                        <p class="text-sm opacity-90">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="flex-shrink-0 ml-4">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    }
+}
+</script>
+</body>
+</html>

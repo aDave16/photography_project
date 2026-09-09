@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery | Dhrumil Bajak Cinematic Photography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'css/cinematic.css' %}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+    {{ projects_json|json_script:"projects-data" }}
+    <script>
+        function galleryData() {
+            return {
+                mobileMenu: false,
+                projectSlug: '{{ initial_project_slug|default:"" }}',
+                lightboxPhoto: null,
+                project: null,
+                projects: JSON.parse(document.getElementById('projects-data').textContent),
+                init() {
+                    this.project = this.projects[this.projectSlug] || Object.values(this.projects)[0];
+                    setTimeout(() => {
+                        document.body.classList.add('page-loaded');
+                    }, 50);
+                },
+                openLightbox(photo) {
+                    this.lightboxPhoto = photo;
+                },
+                closeLightbox() {
+                    this.lightboxPhoto = null;
+                }
+            };
+        }
+    </script>
+</head>
+
+<body x-data="galleryData()" x-init="init()" class="cursor-none">
+    <div id="cursor" class="custom-cursor hidden md:block"></div>
+
+    <nav
+        class="fixed w-full z-50 bg-dark/90 backdrop-blur-xl py-4 border-b border-gold/10 transition-all duration-700 ease-in-out px-6 md:px-12 flex justify-between items-center">
+        <a href="{% url 'home' %}"
+            class="flex items-end gap-4 text-xl font-light tracking-[0.2em] uppercase playfair group">
+            <span>Dhrumil <span
+                    class="text-gold transition-all duration-500 group-hover:tracking-[0.5em]">Bajak</span></span>
+        </a>
+
+        <div class="hidden md:flex space-x-12 text-[10px] uppercase tracking-[0.4em] font-light">
+            <a href="{% url 'home' %}" class="nav-link hover:text-gold transition-colors">Home</a>
+            <a href="{% url 'portfolio' %}" class="nav-link text-gold">Portfolio</a>
+            <a href="{% url 'about' %}" class="nav-link hover:text-gold transition-colors">About</a>
+            <a href="{% url 'services' %}" class="nav-link hover:text-gold transition-colors">Services</a>
+            <a href="{% url 'booking' %}"
+                class="nav-link text-white font-semibold hover:text-gold transition-colors">Book Session</a>
+            <a href="{% url 'contact' %}" class="nav-link hover:text-gold transition-colors">Contact</a>
+        </div>
+
+        <button @click="mobileMenu = !mobileMenu" class="md:hidden text-white hover:text-gold transition-colors">
+            <i data-lucide="menu" x-show="!mobileMenu"></i>
+            <i data-lucide="x" x-show="mobileMenu"></i>
+        </button>
+    </nav>
+
+    <div x-show="mobileMenu" x-transition:enter="transition ease-out duration-500"
+        x-transition:enter-start="opacity-0 translate-y-[-100%]" x-transition:enter-end="opacity-100 translate-y-0"
+        class="fixed inset-0 bg-dark z-40 flex flex-col items-center justify-center space-y-10 text-xl uppercase tracking-[0.4em] font-light"
+        x-cloak>
+        <a @click="mobileMenu = false" href="{% url 'home' %}">Home</a>
+        <a @click="mobileMenu = false" href="{% url 'portfolio' %}" class="text-gold">Portfolio</a>
+        <a @click="mobileMenu = false" href="{% url 'about' %}">About</a>
+        <a @click="mobileMenu = false" href="{% url 'services' %}">Services</a>
+        <a @click="mobileMenu = false" href="{% url 'booking' %}"
+            class="text-white font-semibold hover:text-gold transition-colors">Book Session</a>
+        <a @click="mobileMenu = false" href="{% url 'contact' %}">Contact</a>
+    </div>
+
+    <main class="page-wrapper min-h-screen pt-36 pb-24 px-6 md:px-12">
+        <div class="max-w-7xl mx-auto space-y-16" x-show="project" x-cloak>
+            <div class="grid gap-12 lg:grid-cols-[1.4fr_0.9fr] items-end">
+                <div class="space-y-8 reveal">
+                    <div class="inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.4em] text-white/40">
+                        <a href="{% url 'portfolio' %}"
+                            class="text-gold hover:text-white transition-colors">Portfolio</a>
+                        <span>/</span>
+                        <span x-text="project.title"></span>
+                    </div>
+                    <h1 class="text-5xl md:text-7xl playfair font-light tracking-wider" x-text="project.title"></h1>
+                    <p class="max-w-3xl text-white/70 leading-relaxed md:text-lg" x-text="project.subtitle"></p>
+                    <a href="{% url 'portfolio' %}"
+                        class="inline-flex items-center gap-3 uppercase tracking-[0.3em] text-[10px] text-gold border border-gold/20 px-6 py-4 rounded-full hover:bg-gold/10 transition-all duration-500">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Back to Portfolio</span>
+                    </a>
+                </div>
+                <div class="gallery-header reveal">
+                    <span class="text-[10px] uppercase tracking-[0.5em] text-gold">Curated Project</span>
+                    <p class="mt-6 text-white/70 leading-relaxed">A dedicated gallery of cinematic moments and
+                        storytelling frames crafted for each shoot.</p>
+                </div>
+            </div>
+
+            <div class="gallery-grid reveal">
+                <template x-for="photo in project.images" :key="photo.url">
+                    <button type="button" @click="openLightbox(photo)" class="gallery-card group">
+                        <img :src="photo.url" :alt="photo.alt" loading="lazy" decoding="async">
+                        <div class="image-overlay">
+                            <div class="gallery-caption">
+                                <p x-text="photo.caption"></p>
+                                <small x-text="photo.secondary"></small>
+                            </div>
+                        </div>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto py-20 text-center" x-show="!project" x-cloak>
+            <p class="text-white/30 text-xl font-light">No projects available in the gallery.</p>
+            <a href="{% url 'portfolio' %}"
+                class="text-gold mt-4 inline-block uppercase tracking-[0.2em] text-xs">Return to Portfolio</a>
+        </div>
+    </main>
+
+    <div x-show="lightboxPhoto" x-cloak x-transition.opacity class="gallery-lightbox" @click.self="closeLightbox()"
+        @keydown.escape.window="closeLightbox()">
+        <div class="relative max-w-[1200px] w-full mx-auto">
+            <button @click="closeLightbox()"
+                class="absolute top-6 right-6 z-20 text-white hover:text-gold transition-colors">
+                <i data-lucide="x" class="w-8 h-8"></i>
+            </button>
+            <img :src="lightboxPhoto.url" :alt="lightboxPhoto.alt" loading="lazy" decoding="async">
+            <div class="lightbox-copy">
+                <p class="text-white/80" x-text="lightboxPhoto.caption"></p>
+                <p class="mt-3 text-white/60" x-text="lightboxPhoto.secondary"></p>
+            </div>
+        </div>
+    </div>
+
+    <footer
+        class="py-16 px-6 border-t border-gold/5 bg-[#080808] text-center text-[10px] uppercase tracking-[0.4em] text-white/40">
+        &copy; 2026 Dhrumil Bajak Photography. All rights reserved.
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+        document.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,411 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inquiries | Dhrumil Bajak Photography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/cinematic.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar for dashboard */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D4AF37;
+        }
+
+        .dash-card {
+            background: rgba(20, 20, 20, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(212, 175, 55, 0.2);
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+        }
+
+        .glass {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+        }
+
+        .inquiry-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .inquiry-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(212, 175, 55, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-new {
+            background: rgba(212, 175, 55, 0.15);
+            color: #D4AF37;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .status-replied {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#080808',
+                        charcoal: '#111111',
+                        gold: '#D4AF37',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body x-data="{ mobileMenu: false }"
+    class="text-white selection:bg-gold/30 selection:text-white">
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Mobile Sidebar Overlay -->
+        <div x-show="mobileMenu" style="display: none;"
+            class="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden" @click="mobileMenu = false"
+            x-transition.opacity></div>
+
+        <!-- Left Sidebar Navigation -->
+        <aside
+            class="fixed lg:static inset-y-0 left-0 z-50 w-72 bg-[#0a0a0a] border-r border-white/5 transform transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col h-full shadow-2xl"
+            :class="mobileMenu ? 'translate-x-0' : '-translate-x-full'">
+
+            <!-- Logo area -->
+            <div class="px-8 py-8 flex items-center justify-between border-b border-white/5">
+                <a href="{% url 'home' %}"
+                    class="text-xl font-light tracking-[0.2em] uppercase playfair flex items-center gap-2">
+                    Dhrumil <span class="text-gold">Admin</span>
+                </a>
+                <button @click="mobileMenu = false" class="lg:hidden text-white/50 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-4 py-8 space-y-2 overflow-y-auto">
+                <a href="{% url 'admin_dashboard' %}"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Dashboard Profile
+                </a>
+
+                <a href="{% url 'admin_gallery' %}"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="folder-plus" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Create Gallery
+                </a>
+
+                <a href="{% url 'admin_gallery' %}"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="upload-cloud" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Upload Images
+                </a>
+
+                <a href="{% url 'admin_gallery' %}"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="film" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Manage Video Reels
+                </a>
+
+                <div class="pt-4 pb-2 px-4"><span class="text-[10px] uppercase tracking-[0.3em] text-white/30 font-bold">Studio Ops</span></div>
+
+                <a href="{% url 'admin_bookings' %}"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="calendar-check" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Manage Bookings
+                </a>
+
+                <a href="{% url 'dashboard_inquiries' %}"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group bg-white/5 text-gold border border-gold/20">
+                    <i data-lucide="message-circle-question" class="w-5 h-5 text-gold"></i>
+                    Customer Inquiries
+                </a>
+
+                <a href="{% url 'admin_bookings' %}"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="calendar" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Availability Control
+                </a>
+
+                <a href="{% url 'admin_services' %}"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="indian-rupee" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Revenue & Pricing
+                </a>
+
+                <a href="{% url 'admin_contacts' %}"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    AI Concierge (Bot)
+                </a>
+
+                <a href="{% url 'admin_contacts' %}"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="message-square" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    WhatsApp Integration
+                </a>
+
+                <a href="{% url 'admin_contacts' %}"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group text-white/60 hover:bg-white/5 hover:text-white">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-white/40 group-hover:text-gold"></i>
+                    Financial Cloud
+                </a>
+            </nav>
+
+            <!-- Bottom Action -->
+            <div class="px-6 py-6 border-t border-white/5">
+                <form action="{% url 'logout' %}" method="post" class="w-full">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium text-white/50 hover:text-red-400 hover:bg-red-400/10 transition-all transition-colors group">
+                        <i data-lucide="log-out" class="w-5 h-5 group-hover:text-red-400"></i>
+                        Secure Logout
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+
+            <!-- Top Header -->
+            <header
+                class="h-20 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/5 flex items-center justify-between px-6 md:px-10 z-30 sticky top-0">
+                <div class="flex items-center gap-4">
+                    <button @click="mobileMenu = true"
+                        class="lg:hidden text-white/70 hover:text-white bg-white/5 p-2 rounded-lg">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <h2 class="text-lg md:text-xl font-medium tracking-wide">Customer Inquiries</h2>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <div class="hidden sm:block text-right">
+                        <p class="text-sm font-medium">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p class="text-xs text-gold tracking-widest uppercase mt-0.5">Administrator</p>
+                    </div>
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-tr from-gold to-yellow-600 flex items-center justify-center text-black font-bold shadow-[0_0_15px_rgba(212,175,55,0.4)]">
+                        {{ request.user.username|upper|slice:":2" }}
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area Scrollable -->
+            <div class="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth relative">
+
+                <div class="max-w-6xl mx-auto pb-20">
+
+                    <!-- Inquiries Section -->
+                    <div class="glass rounded-2xl p-6 mt-10">
+    
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-white">
+                                Customer Inquiries
+                            </h2>
+
+                            <span class="text-gold">
+                                {{ inquiries|length }} Total
+                            </span>
+                        </div>
+
+                        <div class="space-y-4">
+
+                            {% for inquiry in inquiries %}
+
+                            <div class="inquiry-card">
+
+                                <div class="flex justify-between items-start mb-3">
+                                    
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">
+                                            {{ inquiry.name }}
+                                        </h3>
+
+                                        <p class="text-gray-400 text-sm">
+                                            {{ inquiry.email }}
+                                        </p>
+                                    </div>
+
+                                    <span class="status-badge {% if inquiry.replied %}status-replied{% else %}status-new{% endif %}">
+                                        {% if inquiry.replied %}Replied{% else %}New{% endif %}
+                                    </span>
+
+                                </div>
+
+                                <div class="mb-3">
+                                    <p class="text-gold font-medium">
+                                        Event Type:
+                                    </p>
+
+                                    <p class="text-gray-300">
+                                        {{ inquiry.get_event_type_display }}
+                                    </p>
+                                </div>
+
+                                <div class="mb-4">
+                                    <p class="text-gold font-medium">
+                                        Inquiry Message:
+                                    </p>
+
+                                    <p class="text-gray-300">
+                                        {{ inquiry.message }}
+                                    </p>
+                                </div>
+
+                                <div class="flex justify-between items-center">
+
+                                    <small class="text-gray-500">
+                                        {{ inquiry.created_at|date:"F j, Y" }}
+                                    </small>
+
+                                    <div class="flex gap-2">
+                                        <a href="mailto:{{ inquiry.email }}"
+                                           class="bg-gold text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition text-sm">
+                                            Reply
+                                        </a>
+                                        <button onclick="deleteInquiry('{{ inquiry.id }}')"
+                                           class="bg-red-500/10 text-red-500 border border-red-500/30 px-4 py-2 rounded-lg font-semibold hover:bg-red-500/20 transition text-sm">
+                                            Delete
+                                        </button>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            {% empty %}
+
+                            <div class="text-center text-gray-400 py-10">
+                                No inquiries yet
+                            </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+
+    <script>
+    function deleteInquiry(inquiryId) {
+        if (confirm('Are you sure you want to delete this inquiry?')) {
+            fetch('/dashboard/update-inquiry-status/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    inquiry_id: inquiryId,
+                    action: 'delete'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error deleting inquiry');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting inquiry');
+            });
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+</body>
+</html>

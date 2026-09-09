@@ -1,0 +1,108 @@
+{% extends 'main/dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="{ showUploadModal: false }">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
+        <div>
+            <h1 class="text-3xl font-light playfair tracking-tight text-white">Gallery Images</h1>
+            <p class="text-white/50 text-sm mt-1">Upload images into an active category and keep the portfolio in sync with the database.</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="{% url 'dashboard_gallery_categories' %}" class="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-white/10 hover:bg-white/5 text-white/70 text-sm font-semibold uppercase tracking-widest transition-all">Manage Categories</a>
+            <button type="button" @click="showUploadModal = true" class="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gold hover:bg-yellow-400 text-black text-sm font-bold uppercase tracking-widest transition-all shadow-[0_4px_15px_rgba(212,175,55,0.3)]">Upload Images</button>
+        </div>
+    </div>
+
+    <div class="dash-card p-6 md:p-8 mb-8">
+        <form method="post" action="{% url 'upload_gallery_images' %}" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Category</label>
+                <select name="category" required class="input-field w-full max-w-xl px-4 py-3 rounded-xl text-sm">
+                    <option value="" disabled selected>Select category...</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% empty %}
+                        <option value="" disabled>No active categories found</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Select Images</label>
+                <input type="file" name="images" multiple accept="image/*" required class="input-field w-full max-w-xl px-4 py-3 rounded-xl text-sm">
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="px-8 py-3 rounded-full bg-gold hover:bg-yellow-400 text-black shadow-[0_4px_15px_rgba(212,175,55,0.4)] text-sm uppercase tracking-widest font-bold transition-all">Start Upload</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="flex items-center justify-between gap-4 mb-5">
+        <h2 class="text-xl font-medium text-white">Existing Images</h2>
+        <p class="text-xs uppercase tracking-[0.25em] text-white/40">{{ images|length }} total</p>
+    </div>
+
+    {% if images %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for image in images %}
+        <div class="dash-card group overflow-hidden relative aspect-square bg-black/50">
+            {% if image.image %}
+            <img src="{{ image.image.url }}" alt="{{ image.title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+            {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-4">
+                <div class="flex justify-end gap-2">
+                    <a href="{% url 'edit_gallery_image' image.id %}" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors" title="Edit">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </a>
+                    <a href="{% url 'delete_gallery_image' image.id %}" class="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg text-red-500 transition-colors" title="Delete">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </a>
+                </div>
+                <div>
+                    <h3 class="text-white font-medium truncate">{{ image.title }}</h3>
+                    <p class="text-xs text-gold uppercase tracking-widest mt-1">{{ image.category.name|default:"Uncategorized" }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="dash-card p-12 text-center">
+        <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        </div>
+        <h3 class="text-xl font-medium text-white mb-2">No images found</h3>
+        <p class="text-white/50 mb-8 max-w-sm mx-auto">Your gallery is currently empty. Start uploading images into a category.</p>
+        <button type="button" @click="showUploadModal = true" class="inline-block px-8 py-3 rounded-full bg-gold hover:bg-yellow-400 text-black text-sm font-bold uppercase tracking-widest transition-all">Upload First Image</button>
+    </div>
+    {% endif %}
+
+    <div x-show="showUploadModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm" style="display: none;">
+        <div @click.outside="showUploadModal = false" class="dash-card w-full max-w-lg p-8">
+            <h2 class="text-2xl font-light playfair mb-6">Quick Upload</h2>
+            <form method="post" action="{% url 'upload_gallery_images' %}" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Category</label>
+                    <select name="category" required class="input-field w-full px-4 py-3 rounded-xl text-sm">
+                        <option value="" disabled selected>Select category...</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Select Images</label>
+                    <input type="file" name="images" multiple accept="image/*" required class="input-field w-full px-4 py-3 rounded-xl text-sm">
+                </div>
+                <div class="flex justify-end gap-4 mt-8">
+                    <button type="button" @click="showUploadModal = false" class="px-6 py-2 text-white/50 hover:text-white transition-colors">Cancel</button>
+                    <button type="submit" class="px-8 py-2 bg-gold text-black rounded-full font-bold uppercase tracking-widest text-xs">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

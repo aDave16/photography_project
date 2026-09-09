@@ -1,0 +1,366 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Services Management | Dhrumil Bajak Photography{% endblock %}
+
+{% block extra_css %}
+<style>
+    .service-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        border-color: rgba(212, 175, 55, 0.4);
+    }
+    
+    .service-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+    }
+    
+    .service-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--gold);
+        margin-bottom: 8px;
+    }
+    
+    .service-meta {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+    
+    .meta-label {
+        font-weight: 500;
+        color: var(--gold);
+        min-width: 80px;
+    }
+    
+    .service-description {
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 15px;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-primary {
+        background: var(--gold);
+        color: var(--dark-bg);
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary:hover {
+        background: rgba(212, 175, 55, 0.9);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+    }
+    
+    .btn-secondary {
+        background: transparent;
+        color: var(--gold);
+        padding: 8px 16px;
+        border: 1px solid var(--gold);
+        border-radius: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-secondary:hover {
+        background: var(--gold);
+        color: var(--dark-bg);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+    }
+    
+    .btn-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-danger:hover {
+        background: rgba(239, 68, 68, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    }
+    
+    .price-tag {
+        display: inline-block;
+        background: var(--gold);
+        color: var(--dark-bg);
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    
+    .featured-badge {
+        display: inline-block;
+        background: var(--gold);
+        color: var(--dark-bg);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    @media (max-width: 768px) {
+        .service-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .service-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="glass p-8">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold text-gold">Services Management</h2>
+        <div class="search-bar">
+            <form method="GET">
+                <input type="text" 
+                       name="search" 
+                       value="{{ search_query }}" 
+                       placeholder="Search services..." 
+                       class="search-input">
+                <select name="featured" onchange="this.form.submit()" class="filter-select">
+                    <option value="">All Featured</option>
+                    <option value="featured" {% if featured_filter == 'featured' %}selected{% endif %}>Featured</option>
+                    <option value="not_featured" {% if featured_filter == 'not_featured' %}selected{% endif %}>Not Featured</option>
+                </select>
+                <select name="active" onchange="this.form.submit()" class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="active" {% if active_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if active_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+                <button onclick="window.location.href='{% url 'dashboard_create_service' %}'" class="btn-primary">
+                    + Add Service
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="space-y-6">
+        {% for service in services %}
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-title">
+                        {{ service.title }}
+                        {% if service.is_featured %}
+                            <span class="featured-badge">Featured</span>
+                        {% endif %}
+                    </div>
+                    <div class="service-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Type:</span>
+                            <span>{{ service.get_service_type_display }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Price:</span>
+                            <span class="price-tag">₹{{ service.price|floatformat:0|intcomma }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Status:</span>
+                            <span class="status-badge {% if service.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                {% if service.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="service-description">
+                    {% if service.short_description %}
+                    {{ service.short_description|linebreaks }}
+                    {% else %}
+                    {{ service.get_short_description_text|linebreaks }}
+                    {% endif %}
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="{% url 'dashboard_update_service' service.id %}" class="btn-primary">Edit</a>
+                    <button onclick="toggleServiceFeatured('{{ service.id }}')" 
+                            class="btn-secondary">
+                        {% if service.is_featured %}Unfeature{% else %}Feature{% endif %}
+                    </button>
+                    <button onclick="toggleServiceActive('{{ service.id }}')" 
+                            class="btn-secondary">
+                        {% if service.is_active %}Deactivate{% else %}Activate{% endif %}
+                    </button>
+                    <button onclick="deleteService('{{ service.id }}')" 
+                            class="btn-danger">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center py-12">
+                <div class="text-xl text-white/70 mb-4">No services found</div>
+                <div class="text-sm text-white/50">Try adjusting your search or filter criteria</div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if services.has_other_pages %}
+        <div class="flex justify-center items-center gap-4 mt-8">
+            {% if services.has_previous %}
+                <a href="?page={{ services.previous_page_number }}" 
+                   class="btn-secondary">
+                    Previous
+                </a>
+            {% endif %}
+            
+            <span class="text-white/70">
+                Page {{ services.number }} of {{ services.paginator.num_pages }}
+            </span>
+            
+            {% if services.has_next %}
+                <a href="?page={{ services.next_page_number }}" 
+                   class="btn-secondary">
+                    Next
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+{% csrf_token %}
+<script>
+function getCsrfToken() {
+    const el = document.querySelector('[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
+}
+
+function postServiceAction(serviceId, action) {
+    const formData = new FormData();
+    formData.append('service_id', serviceId);
+    formData.append('action', action);
+    return fetch('{% url "dashboard_service_ajax" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCsrfToken() },
+        body: formData
+    });
+}
+
+function toggleServiceFeatured(serviceId) {
+    postServiceAction(serviceId, 'toggle_featured')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Error updating service');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating service');
+    });
+}
+
+function toggleServiceActive(serviceId) {
+    postServiceAction(serviceId, 'toggle_active')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Error updating service');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating service');
+    });
+}
+
+function deleteService(serviceId) {
+    if (confirm('Are you sure you want to delete this service?')) {
+        postServiceAction(serviceId, 'delete')
+        .then(response => response.json())
+    .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Error deleting service');
+            }
+        })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error deleting service');
+    });
+}
+}
+</script>
+{% endblock %}

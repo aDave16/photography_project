@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body{
+            background:#0f0f0f;
+            color:white;
+            font-family:Arial,sans-serif;
+        }
+
+        .sidebar{
+            width:260px;
+            background:#171717;
+            min-height:100vh;
+            position:fixed;
+            left:0;
+            top:0;
+            padding:20px;
+        }
+
+        .content{
+            margin-left:280px;
+            padding:30px;
+        }
+
+        a{
+            display:block;
+            padding:12px;
+            border-radius:10px;
+            margin-bottom:10px;
+            color:white;
+            text-decoration:none;
+            transition:.3s;
+        }
+
+        a:hover{
+            background:#262626;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2 class="text-2xl font-bold mb-6">
+            Dashboard
+        </h2>
+
+        <a href="/dashboard/">Home</a>
+        <a href="/dashboard/bookings/">Bookings</a>
+        <a href="/dashboard/inquiries/">Inquiries</a>
+        <a href="/dashboard/services/">Services</a>
+        <a href="/dashboard/gallery/">Gallery</a>
+        <a href="/dashboard/calendar/">Calendar</a>
+    </div>
+
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>

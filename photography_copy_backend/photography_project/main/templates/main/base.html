@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dhrumil Bajak | Cinematic Photography{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,400&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{% static 'css/cinematic.css' %}">
+    {% block extra_css %}{% endblock %}
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+        
+        /* Mobile Menu Booking Button Styles */
+        @media (max-width: 768px) {
+            #advanced-features-overlay {
+                z-index: 9999 !important;
+            }
+            .feature-glass {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0a0a0a',
+                        charcoal: '#1a1a1a',
+                        gold: '#D4AF37',
+                    }
+                }
+            }
+        }
+
+        // Simplified Alpine.js App Configuration
+        window.mainApp = function () {
+            return {
+                scrolled: false,
+                mobileMenu: false,
+                videoMuted: false,
+                
+                init() {
+                    this.setVideoMute();
+                },
+
+                toggleMenu() {
+                    this.mobileMenu = !this.mobileMenu;
+                },
+
+                closeMenu() {
+                    this.mobileMenu = false;
+                },
+
+                scrollToBooking() {
+                    document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' });
+                },
+
+                setVideoMute() {
+                    const video = document.querySelector('video');
+                    if (video) {
+                        video.muted = this.videoMuted;
+                    }
+                },
+
+                toggleVideoMute() {
+                    this.videoMuted = !this.videoMuted;
+                    const video = document.querySelector('video');
+                    if (video) {
+                        video.muted = this.videoMuted;
+                    }
+
+                    // Update button aria-label
+                    const button = document.querySelector('[aria-label*="Background"]');
+                    if (button) {
+                        button.setAttribute('aria-label', this.videoMuted ? 'Unmute Background' : 'Mute Background');
+                    }
+                }
+            };
+        };
+    </script>
+</head>
+
+<body class="bg-dark text-white cursor-none" x-data="mainApp()" 
+    x-on:scroll.window="scrolled = window.pageYOffset > 50" 
+    x-on:keydown.escape.window="mobileMenu = false"
+    class="cursor-none">
+    {% csrf_token %}
+    
+    {% block content %}{% endblock %}
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

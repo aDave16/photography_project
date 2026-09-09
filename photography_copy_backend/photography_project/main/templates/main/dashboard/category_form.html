@@ -1,0 +1,96 @@
+{% extends 'main/dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{% url 'dashboard_gallery_categories' %}" class="inline-flex items-center gap-2 text-white/50 hover:text-gold transition-colors mb-4 group">
+            <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back to Categories
+        </a>
+        <h1 class="text-3xl font-light playfair tracking-tight text-white">{{ action }} Category</h1>
+        <p class="text-white/50 text-sm mt-1">{% if category %}Editing: {{ category.name }}{% else %}Fill in the details to create a new category.{% endif %}</p>
+    </div>
+
+    <div class="dash-card p-6 md:p-10">
+        <form method="post" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Name -->
+                <div class="space-y-2">
+                    <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium">Category Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Slug -->
+                <div class="space-y-2">
+                    <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium">Slug (Optional)</label>
+                    {{ form.slug }}
+                    {% if form.slug.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.slug.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="space-y-2">
+                <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 gap-8">
+                <!-- Display Order -->
+                <div class="space-y-2">
+                    <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium">Display Order</label>
+                    {{ form.display_order }}
+                    {% if form.display_order.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.display_order.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Checkboxes -->
+            <div class="flex flex-wrap gap-8 pt-4 border-t border-white/5">
+                <label class="inline-flex items-center gap-3 cursor-pointer group">
+                    {{ form.is_active }}
+                    <span class="text-sm text-white/70 group-hover:text-white transition-colors">Is Active</span>
+                </label>
+            </div>
+
+            <!-- Actions -->
+            <div class="pt-8 border-t border-white/5 flex justify-end gap-4">
+                <a href="{% url 'dashboard_gallery_categories' %}" class="px-8 py-3 rounded-full border border-white/10 text-white/50 hover:bg-white/5 text-sm uppercase tracking-widest font-semibold transition-all">
+                    Cancel
+                </a>
+                <button type="submit" class="px-10 py-3 rounded-full bg-gold hover:bg-yellow-400 text-black shadow-[0_4px_15px_rgba(212,175,55,0.4)] text-sm uppercase tracking-widest font-bold transition-all transform hover:-translate-y-0.5">
+                    {{ action }} Category
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Ensure the checkboxes look okay with our style */
+    input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        background-color: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.25rem;
+        cursor: pointer;
+    }
+    input[type="checkbox"]:checked {
+        background-color: #D4AF37;
+        border-color: #D4AF37;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,654 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dhrumil Bajak | Cinematic Photography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,400&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{% static 'css/cinematic.css' %}">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* Mobile Menu Booking Button Styles */
+        @media (max-width: 768px) {
+            #advanced-features-overlay {
+                z-index: 9999 !important;
+            }
+
+            .feature-glass {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0a0a0a',
+                        charcoal: '#1a1a1a',
+                        gold: '#D4AF37',
+                    }
+                }
+            }
+        }
+
+        // Simplified Alpine.js App Configuration
+        window.mainApp = function () {
+            return {
+                scrolled: false,
+                mobileMenu: false,
+                videoMuted: false,
+
+                init() {
+                    this.setVideoMute();
+                },
+
+                setVideoMute() {
+                    const video = document.getElementById('bgVideo');
+                    if (video) {
+                        video.muted = this.videoMuted;
+                    }
+                },
+
+                toggleMute() {
+                    const video = document.getElementById('bgVideo');
+                    if (video) {
+                        this.videoMuted = !this.videoMuted;
+                        video.muted = this.videoMuted;
+
+                        // If unmuting, try to play with sound
+                        if (!this.videoMuted) {
+                            video.play().then(() => {
+                                // Successfully unmuted and playing
+                                console.log('Video unmuted successfully');
+                            }).catch((error) => {
+                                // Browser blocked autoplay, fallback to muted
+                                console.log('Autoplay blocked, keeping muted');
+                                this.videoMuted = true;
+                                video.muted = true;
+                                video.play();
+                            });
+                        } else {
+                            console.log('Video muted');
+                        }
+
+                        // Update button visual feedback
+                        this.updateVolumeButton();
+                    }
+                },
+
+                updateVolumeButton() {
+                    // This function can be used for additional visual feedback
+                    const button = document.querySelector('[@click="toggleMute()"]');
+                    if (button) {
+                        button.setAttribute('aria-label', this.videoMuted ? 'Unmute Background' : 'Mute Background');
+                    }
+                },
+
+                toggleMenu() {
+                    this.mobileMenu = !this.mobileMenu;
+                },
+
+                closeMenu() {
+                    this.mobileMenu = false;
+                }
+            };
+        };
+    </script>
+</head>
+
+<body x-data="mainApp()" x-init="init()" x-on:scroll.window="scrolled = window.pageYOffset > 50"
+    x-on:autoplay-blocked.window="videoMuted = true" x-on:enter-site.window="videoMuted = false"
+    x-on:keydown.escape.window="closeMenu()" class="cursor-none">
+    <!-- ====== DJANGO TEMPLATE: main/templates/main/index.html ====== -->
+    {% csrf_token %}
+
+    <!-- Custom Cursor -->
+    <div id="cursor" class="custom-cursor hidden md:block"></div>
+
+    <!-- Sticky Navbar -->
+    <nav :class="scrolled ? 'bg-dark/90 backdrop-blur-xl py-4 border-b border-gold/10' : 'bg-dark py-8'"
+        class="fixed top-0 left-0 w-full z-50 transition-all duration-700 ease-in-out px-6 md:px-12 flex justify-between items-center overflow-visible">
+        <a href="{% url 'home' %}"
+            class="flex items-end gap-4 text-xl font-light tracking-[0.15em] uppercase playfair group">
+            <span>Dhrumil <span
+                    class="text-gold transition-all duration-500 group-hover:tracking-[0.3em]">Bajak</span></span>
+        </a>
+
+        <!-- Desktop Menu -->
+        <div class="hidden md:flex space-x-12 text-[10px] uppercase tracking-[0.25em] font-light">
+            <a href="{% url 'home' %}" class="nav-link text-gold">Home</a>
+            <a href="{% url 'portfolio' %}" class="nav-link hover:text-gold transition-colors">Portfolio</a>
+            <a href="{% url 'about' %}" class="nav-link hover:text-gold transition-colors">About</a>
+            <a href="{% url 'services' %}" class="nav-link hover:text-gold transition-colors">Services</a>
+            <a href="{% url 'booking' %}"
+                class="nav-link text-white font-semibold hover:text-gold transition-colors">Book Session</a>
+            <a href="{% url 'contact' %}" class="nav-link hover:text-gold transition-colors">Contact</a>
+        </div>
+
+        <!-- Mobile Toggle Button -->
+        <button @click="toggleMenu()"
+            class="md:hidden text-white hover:text-gold transition-colors w-10 h-10 flex items-center justify-center"
+            aria-label="Toggle menu">
+            <!-- Hamburger Menu Icon (3 bars) -->
+            <div x-show="!mobileMenu" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 rotate-90" x-transition:enter-end="opacity-100 rotate-0"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 rotate-0"
+                x-transition:leave-end="opacity-0 -rotate-90" class="flex flex-col items-center justify-center gap-1.5">
+                <span class="w-6 h-0.5 bg-current transition-all duration-300"></span>
+                <span class="w-6 h-0.5 bg-current transition-all duration-300"></span>
+                <span class="w-6 h-0.5 bg-current transition-all duration-300"></span>
+            </div>
+
+            <!-- Close Icon (X) -->
+            <div x-show="mobileMenu" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 rotate-90" x-transition:enter-end="opacity-100 rotate-0"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 rotate-0"
+                x-transition:leave-end="opacity-0 -rotate-90" class="flex items-center justify-center">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </div>
+        </button>
+
+        <div class="nav-waves">
+            <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+                <defs>
+                    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="rgba(20, 20, 20, 0.85)" />
+                        <stop offset="45%" stop-color="rgba(212, 175, 55, 0.38)" />
+                        <stop offset="100%" stop-color="rgba(255, 215, 0, 0.12)" />
+                    </linearGradient>
+                    <path id="gentle-wave"
+                        d="M-160 44c30 0 58-10 88-10s 58 10 88 10 58-10 88-10 58 10 88 10 v44h-352z" />
+                </defs>
+                <g class="parallax-waves">
+                    <use xlink:href="#gentle-wave" x="48" y="0" fill="url(#waveGradient)" />
+                    <use xlink:href="#gentle-wave" x="48" y="3" fill="url(#waveGradient)" />
+                    <use xlink:href="#gentle-wave" x="48" y="5" fill="url(#waveGradient)" />
+                    <use xlink:href="#gentle-wave" x="48" y="7" fill="url(#waveGradient)" />
+                </g>
+            </svg>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Dropdown -->
+    <div x-show="mobileMenu" x-transition:enter="transition ease-out duration-500"
+        x-transition:enter-start="opacity-0 translate-y-[-100%]" x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-400" x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-[-100%]" @click.outside="closeMenu()"
+        class="fixed inset-0 bg-dark z-40 flex flex-col items-center justify-center space-y-10 text-xl uppercase tracking-[0.25em] font-light"
+        x-cloak>
+        <a @click="closeMenu()" href="{% url 'home' %}"
+            class="text-gold hover:text-white transition-colors cursor-pointer">Home</a>
+        <a @click="closeMenu()" href="{% url 'portfolio' %}"
+            class="hover:text-gold transition-colors cursor-pointer">Portfolio</a>
+        <a @click="closeMenu()" href="{% url 'about' %}"
+            class="hover:text-gold transition-colors cursor-pointer">About</a>
+        <a @click="closeMenu()" href="{% url 'services' %}"
+            class="hover:text-gold transition-colors cursor-pointer">Services</a>
+        <a @click="closeMenu()" href="{% url 'booking' %}"
+            class="text-white font-semibold hover:text-gold transition-colors cursor-pointer">Book Session</a>
+        <a @click="closeMenu()" href="{% url 'contact' %}"
+            class="hover:text-gold transition-colors cursor-pointer">Contact</a>
+
+        <!-- Mobile Booking Button -->
+        <button
+            @click="closeMenu(); setTimeout(() => document.getElementById('advanced-features-overlay')?.classList.remove('hidden'), 300);"
+            class="mt-6 px-8 py-4 bg-gold text-dark font-bold uppercase tracking-[0.2em] text-sm rounded-full hover:bg-white transition-all transform hover:scale-105 shadow-lg">
+            Book Now
+        </button>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative h-screen overflow-hidden flex items-center justify-center">
+        <div class="absolute inset-0 z-0">
+            <!-- Cinematic Background Video -->
+            <video id="bgVideo" autoplay loop playsinline preload="auto" :muted="videoMuted"
+                class="w-full h-full object-cover">
+                <source src="{% static 'images/main.mp4' %}" type="video/mp4">
+            </video>
+        </div>
+
+        <!-- Video Mute Toggle -->
+        <div class="absolute bottom-8 right-6 md:bottom-12 md:right-12 z-20">
+            <button @click="toggleMute()"
+                class="p-4 bg-dark/20 backdrop-blur-md border border-white/10 rounded-full hover:bg-gold/20 transition-all duration-300 group hover:scale-110"
+                :title="videoMuted ? 'Unmute Background' : 'Mute Background'"
+                :aria-label="videoMuted ? 'Unmute Background' : 'Mute Background'">
+
+                <!-- Muted State Icon -->
+                <div x-show="videoMuted" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-75" x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-75"
+                    class="flex items-center justify-center">
+                    <i data-lucide="volume-x" class="w-6 h-6 text-white"></i>
+                </div>
+
+                <!-- Unmuted State Icon -->
+                <div x-show="!videoMuted" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-75" x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-75"
+                    class="flex items-center justify-center">
+                    <i data-lucide="volume-2" class="w-6 h-6 text-white"></i>
+                </div>
+            </button>
+        </div>
+
+        <div class="relative z-10 text-center space-y-8 px-4">
+            <div class="overflow-hidden">
+                <h1 class="text-xl md:text-7xl font-light tracking-[0.2em] uppercase playfair">
+                    Dhrumil's Films
+                </h1>
+            </div>
+            <div class="overflow-hidden">
+                <p class="text-xs md:text-sm tracking-[0.3em] font-light uppercase text-gold/80">
+                    Framing Life Through Light
+                </p>
+            </div>
+            <div class="pt-12">
+                <a href="{% url 'portfolio' %}"
+                    class="group relative px-12 py-5 border border-white/20 text-[10px] uppercase tracking-[0.3em] overflow-hidden transition-all duration-700 hover:border-gold">
+                    <span class="relative z-10 group-hover:text-dark transition-colors duration-700">Explore Work</span>
+                    <div
+                        class="absolute inset-0 bg-gold translate-y-[101%] group-hover:translate-y-0 transition-transform duration-700">
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-4 opacity-50">
+            <span class="text-[8px] uppercase tracking-[0.3em] [writing-mode:vertical-lr]">Scroll</span>
+            <div class="w-[1px] h-12 bg-gradient-to-b from-gold to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- View Trailer Section -->
+    <section class="py-24 bg-dark overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 md:px-12 mb-16 reveal text-center">
+            <span class="text-[10px] uppercase tracking-[0.3em] text-gold mb-4 block">Immersive Experience</span>
+            <h2 class="text-4xl md:text-6xl playfair font-light tracking-wider">View <span
+                    class="italic text-gold">Trailer</span></h2>
+        </div>
+
+        <div class="ticker-container reveal">
+            <div class="ticker-track">
+                <!-- Original Set -->
+                <div class="ticker-item">
+                    <img src="{% static 'images/whatsapp-2026-04-01-14-30-46.jpeg' %}" alt="Trailer 1" loading="lazy"
+                        decoding="async">
+                </div>
+                <div class="ticker-item">
+                    <img src="{% static 'images/whatsapp-2026-04-01-14-30-35.jpeg' %}" alt="Trailer 2" loading="lazy"
+                        decoding="async">
+                </div>
+                <div class="ticker-item">
+                    <img src="{% static 'images/whatsapp-2026-04-01-14-30-52.jpeg' %}" alt="Trailer 3" loading="lazy"
+                        decoding="async">
+                </div>
+                <div class="ticker-item">
+                    <img src="{% static 'images/whatsapp-2026-04-02-19-23-03.jpeg' %}" alt="Trailer 4" loading="lazy"
+                        decoding="async">
+                </div>
+                <div class="ticker-item">
+                    <img src="{% static 'images/whatsapp-2026-04-02-19-27-20.jpeg' %}" alt="Trailer 5" loading="lazy"
+                        decoding="async">
+                </div>
+
+                <!-- Duplicate Set for Seamless Loop -->
+                <div class="ticker-item">
+                    <img src="{% static 'images/whatsapp-2026-04-01-14-30-46.jpeg' %}" alt="Trailer 1" loading="lazy"
+                        decoding="async">
+                </div>
+                <div class="ticker-item">
+                    <img src="{% static 'images/whatsapp-2026-04-01-14-30-35.jpeg' %}" alt="Trailer 2" loading="lazy"
+                        decoding="async">
+                </div>
+                <div class="ticker-item">
+                    <img src="{% static 'images/whatsapp-2026-04-01-14-30-52.jpeg' %}" alt="Trailer 3" loading="lazy"
+                        decoding="async">
+                </div>
+                <div class="ticker-item">
+                    <img src="{% static 'images/whatsapp-2026-04-02-19-23-03.jpeg' %}" alt="Trailer 4" loading="lazy"
+                        decoding="async">
+                </div>
+                <div class="ticker-item">
+                    <img src="{% static 'images/whatsapp-2026-04-02-19-27-20.jpeg' %}" alt="Trailer 5" loading="lazy"
+                        decoding="async">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trailer Modal -->
+    <div id="trailerModal" class="modal-overlay" onclick="closeTrailer()">
+        <button class="absolute top-8 right-8 text-white hover:text-gold transition-colors z-50">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <iframe id="trailerFrame" width="100%" height="100%" src="" frameborder="0"
+                allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- Beyond the Shutter Section -->
+    <section class="py-32 px-6 md:px-12 bg-dark relative">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+                <div class="lg:col-span-5 space-y-10 reveal">
+                    <span class="text-[10px] uppercase tracking-[0.3em] text-gold">The Vision</span>
+                    <h2 class="text-4xl md:text-6xl playfair font-light leading-tight">
+                        Beyond the <br /><span class="italic text-gold">Shutter</span>
+                    </h2>
+                    <p class="text-white/60 font-light leading-relaxed text-lg">
+                        Every photograph is a chapter of a story yet to be told. My work blends
+                        editorial precision with raw, cinematic emotion to create a timeless
+                        narrative for the sophisticated eye.
+                    </p>
+                    <div class="pt-4">
+                        <p class="text-sm uppercase tracking-[0.2em] text-white/60 mb-4">Shall we tell your story next?
+                        </p>
+                        <a href="{% url 'about' %}" class="inline-flex items-center space-x-4 group">
+                            <span
+                                class="text-[10px] uppercase tracking-[0.25em] border-b border-gold/30 pb-1 group-hover:border-gold transition-all">Discover
+                                the Artist</span>
+                            <i data-lucide="arrow-right"
+                                class="w-4 h-4 text-gold transform group-hover:translate-x-2 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="lg:col-span-7 relative group reveal">
+                    <div class="max-w-[80%] mx-auto relative overflow-hidden">
+                        <div
+                            class="absolute inset-0 border border-gold/20 translate-x-4 translate-y-4 -z-10 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-1000">
+                        </div>
+                        <img src="{% static 'images/camera.jpeg' %}" alt="Cinematic Story" loading="lazy"
+                            decoding="async" style="aspect-ratio: 4/3; object-fit: cover;"
+                            class="w-full grayscale hover:grayscale-0 transition-all duration-1000 transform group-hover:scale-105 shadow-2xl">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Our Creative Vision Section -->
+    <section class="py-24 bg-[#050505] overflow-hidden reveal">
+        <div class="max-w-7xl mx-auto px-6 md:px-12">
+            <div class="flex flex-col lg:flex-row items-center gap-8">
+                <div class="flex-1 reveal">
+                    <img src="{% static 'images/WhatsApp Image 2026-04-15 at 11.37.05 AM (1).jpeg' %}"
+                        alt="Vision Image Left - Cinematic Photography" class="vision-image" loading="lazy"
+                        decoding="async" style="object-fit: cover;">
+                </div>
+
+                <div
+                    class="flex-1 glass rounded-[32px] p-10 md:p-14 text-center flex flex-col justify-center items-center gap-6 shadow-[0_40px_90px_rgba(0,0,0,0.35)]">
+                    <span class="text-[10px] uppercase tracking-[0.25em] text-gold/80">Creative Services</span>
+                    <h2 class="text-3xl md:text-4xl font-semibold tracking-tight text-white">Our Creative Vision</h2>
+                    <p class="max-w-xl text-white/70 text-base md:text-lg leading-relaxed">
+                        From cinematic portraits to dynamic brand storytelling, our photography blends emotion,
+                        movement, and polished visual narrative to deliver images that feel both timeless and modern.
+                    </p>
+                    <a href="{% url 'services' %}"
+                        class="inline-flex items-center justify-center px-8 py-4 rounded-full bg-gold text-dark font-semibold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-white hover:text-dark shadow-[0_20px_45px_rgba(212,175,55,0.25)]">
+                        Learn More
+                    </a>
+                </div>
+
+                <div class="flex-1 reveal">
+                    <img src="{% static 'images/WhatsApp Image 2026-04-15 at 11.37.05 AM.jpeg' %}"
+                        alt="Vision Image Right - Cinematic Photography" class="vision-image" loading="lazy"
+                        decoding="async" style="object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- [NEW] WhatsApp & Chat Widgets -->
+    <a href="https://wa.me/919998001549" id="whatsapp-float"
+        class="fixed bottom-8 left-8 z-[100] w-16 h-16 bg-[#25D366] rounded-full flex items-center justify-center text-white shadow-2xl hover:scale-110 transition-transform pulse-whatsapp"
+        target="_blank" rel="noopener noreferrer">
+        <i data-lucide="message-circle" class="w-8 h-8"></i>
+    </a>
+
+    <!--
+    <div class="fixed bottom-8 right-8 z-[100]" id="chat-widget">
+        <button id="chat-toggle"
+            class="w-16 h-16 bg-gold rounded-full flex items-center justify-center text-dark shadow-2xl hover:rotate-12 transition-all">
+            <i data-lucide="sparkles" class="w-8 h-8"></i>
+        </button>
+
+        <div id="chat-window"
+            class="absolute bottom-20 right-0 w-80 md:w-96 glass border-gold/30 rounded-3xl overflow-hidden hidden flex-col shadow-2xl reveal">
+            <div class="bg-gold p-5 flex justify-between items-center text-dark">
+                <span class="font-bold uppercase tracking-widest text-xs">LUXE AI Concierge</span>
+                <button id="close-chat"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="h-96 overflow-y-auto p-5 space-y-4 text-sm flex flex-col" id="chat-messages">
+                <div class="bg-charcoal/50 p-3 rounded-2xl rounded-bl-none text-white/80 border border-white/5">
+                    Welcome to the luxury of cinematography. I am here to assist with pricing, booking, or portfolio
+                    tours. How may I serve you today?
+                </div>
+            </div>
+            <div class="p-4 border-t border-gold/10 flex gap-2">
+                <input type="text" id="chat-input" placeholder="Type your query..."
+                    class="flex-1 bg-charcoal/50 border border-gold/10 rounded-full px-4 py-2 text-white outline-none focus:border-gold">
+                <button type="button" id="send-chat" class="text-gold"><i data-lucide="send"></i></button>
+            </div>
+        </div>
+    </div>
+    -->
+
+    <!-- [NEW] Invoice Modal -->
+    <div id="invoice-modal"
+        class="fixed inset-0 z-[1000] bg-dark/95 backdrop-blur-xl hidden items-center justify-center p-6">
+        <div
+            class="bg-white text-dark w-full max-w-2xl rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-2xl reveal">
+            <button class="absolute top-6 right-6 text-dark/30 hover:text-dark transition-colors" id="close-invoice">
+                <i data-lucide="x-circle" class="w-8 h-8"></i>
+            </button>
+
+            <div id="invoice-content">
+                <div class="flex justify-between items-start mb-12">
+                    <div>
+                        <h2 class="text-3xl font-black italic tracking-tighter">LUXE<span class="text-gold">PHOTO</span>
+                        </h2>
+                        <p class="text-[10px] uppercase tracking-widest text-dark/40">Premium Cinematic Studio</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-bold uppercase tracking-widest mb-1">Invoice</div>
+                        <div class="text-2xl font-light text-dark/60">#INV-2026-001</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8 mb-12">
+                    <div>
+                        <div class="text-[10px] uppercase tracking-widest text-dark/40 mb-2">Billed To</div>
+                        <div class="font-bold uppercase" id="inv-client-name">CLIENT NAME</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] uppercase tracking-widest text-dark/40 mb-2">Date & Slot</div>
+                        <div class="font-bold uppercase" id="inv-date-slot">DATE & SLOT</div>
+                    </div>
+                </div>
+
+                <table class="w-full mb-12">
+                    <thead class="border-b-2 border-dark/5">
+                        <tr class="text-[10px] uppercase tracking-widest text-dark/40 text-left">
+                            <th class="py-4">Service Description</th>
+                            <th class="py-4 text-right">Investment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inv-items">
+                        <!-- Items populated by JS -->
+                    </tbody>
+                </table>
+
+                <div class="flex justify-between items-center pt-8 border-t-2 border-dark/5">
+                    <div class="text-xs uppercase tracking-widest font-bold">Total Amount</div>
+                    <div class="text-4xl font-black text-gold" id="inv-total">₹0</div>
+                </div>
+            </div>
+
+            <div class="mt-12 flex gap-4">
+                <button onclick="window.print()"
+                    class="flex-1 py-4 border-2 border-dark/10 rounded-xl font-bold uppercase tracking-wider hover:bg-dark hover:text-white transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Print
+                </button>
+                <button id="download-invoice-btn"
+                    class="flex-1 py-4 bg-dark text-white rounded-xl font-bold uppercase tracking-wider hover:bg-gold hover:text-dark transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i> Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-20 px-6 border-t border-gold/5 text-center space-y-10 bg-charcoal/30">
+        <div class="flex justify-center">
+            <div class="social-icon-container">
+                <a href="https://instagram.com/dhrumil_bajak" target="_blank" rel="noopener noreferrer"
+                    aria-label="Visit our Instagram" data-tooltip="Instagram"
+                    class="social-btn btn-instagram transition-all duration-500">
+                    <img src="https://cdn.simpleicons.org/instagram/white" alt="Instagram">
+                </a>
+                <a href="https://wa.me/919998001549" target="_blank" rel="noopener noreferrer"
+                    aria-label="Message us on WhatsApp" data-tooltip="WhatsApp"
+                    class="social-btn btn-whatsapp transition-all duration-500">
+                    <img src="https://cdn.simpleicons.org/whatsapp/white" alt="WhatsApp">
+                </a>
+                <a href="tel:+919998001549" aria-label="Call us" data-tooltip="Call"
+                    class="social-btn btn-call transition-all duration-500">
+                    <img src="https://img.icons8.com/ios-filled/50/ffffff/phone.png" alt="Call">
+                </a>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30">
+                &copy; 2026 Dhrumil Bajak Photography. All rights reserved.
+            </p>
+            <p class="text-[8px] uppercase tracking-[0.2em] text-gold/40 italic">
+                Crafting Legacies Through Light
+            </p>
+        </div>
+    </footer>
+
+    <button x-show="scrolled" x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 scale-75" x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-75" @click="window.scrollTo({ top: 0, behavior: 'smooth' })" x-cloak
+        class="scroll-top-btn" aria-label="Scroll to top" title="Back to top">
+        <i data-lucide="chevron-up" class="w-6 h-6"></i>
+    </button>
+    <script src="{% static 'js/features.js' %}"></script>
+    <script>
+        // Autoplay handle logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('bgVideo');
+
+            if (video) {
+                // Attempt to play with sound first
+                video.muted = false;
+                const playPromise = video.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        // If browser blocks audio, play silently instead
+                        video.muted = true;
+                        video.play();
+                        window.dispatchEvent(new CustomEvent('autoplay-blocked'));
+
+                        // Unmute immediately on the first click anywhere on the page
+                        const unmuteOnInteraction = () => {
+                            video.muted = false;
+                            video.play();
+                            window.dispatchEvent(new CustomEvent('enter-site')); // Updates the UI icon to volume-2
+                            document.removeEventListener('click', unmuteOnInteraction);
+                            document.removeEventListener('touchstart', unmuteOnInteraction);
+                        };
+
+                        document.addEventListener('click', unmuteOnInteraction);
+                        document.addEventListener('touchstart', unmuteOnInteraction);
+                    });
+                }
+            }
+        });
+
+        // Custom Cursor Logic
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        document.querySelectorAll('a, button, .cursor-pointer').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+        });
+
+        // Reveal Animation Logic
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Trailer Modal Functions
+        function openTrailer(url) {
+            const modal = document.getElementById('trailerModal');
+            const frame = document.getElementById('trailerFrame');
+            frame.src = url;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+
+        function closeTrailer() {
+            const modal = document.getElementById('trailerModal');
+            const frame = document.getElementById('trailerFrame');
+            frame.src = '';
+            modal.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Volume button visual feedback
+        document.addEventListener('alpine:initialized', () => {
+            // Re-initialize Lucide icons after Alpine is ready
+            setTimeout(() => {
+                lucide.createIcons();
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>
