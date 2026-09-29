@@ -989,6 +989,11 @@ class ChatbotConfiguration(models.Model):
         help_text="System prompt for the AI model"
     )
     
+    fallback_message = models.TextField(
+        default="I apologize, I am having trouble connecting right now. Please try again or contact us on WhatsApp.",
+        help_text="Message displayed when AI is offline or encounters an error"
+    )
+    
     faq_items = models.JSONField(
         default=list,
         blank=True,
@@ -1137,4 +1142,73 @@ class Invoice(models.Model):
         self.status = 'paid'
         self.paid_at = timezone.now()
         self.save()
+
+
+# =============================================================================
+# 14. CHATBOT KNOWLEDGE MODELS
+# =============================================================================
+class ChatbotFAQ(models.Model):
+    """
+    Frequently Asked Questions to train the AI chatbot.
+    """
+    question = models.CharField(max_length=255, help_text="Common question asked by users")
+    answer = models.TextField(help_text="The answer the AI should provide")
+    display_order = models.PositiveIntegerField(default=0, help_text="Order in which FAQs might be displayed or prioritized")
+    is_active = models.BooleanField(default=True, help_text="Enable or disable this FAQ for the AI")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['display_order', '-created_at']
+        verbose_name = 'Chatbot FAQ'
+        verbose_name_plural = 'Chatbot FAQs'
+
+    def __str__(self):
+        return self.question
+
+
+class ChatbotKnowledge(models.Model):
+    """
+    Custom business knowledge snippets for the AI chatbot.
+    (e.g., Booking Policies, Locations, Business Hours)
+    """
+    topic = models.CharField(max_length=150, help_text="e.g., 'Cancellation Policy', 'Locations'")
+    content = models.TextField(help_text="Detailed information the chatbot should know")
+    is_active = models.BooleanField(default=True, help_text="Enable or disable this knowledge for the AI")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Chatbot Knowledge'
+        verbose_name_plural = 'Chatbot Knowledge'
+
+
+class Enquiry(models.Model):
+    STATUS_CHOICES = (
+        ('New', 'New'),
+        ('Contacted', 'Contacted'),
+        ('In Progress', 'In Progress'),
+        ('Converted', 'Converted'),
+        ('Closed', 'Closed'),
+    )
+    name = models.CharField(max_length=150)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=20)
+    service = models.CharField(max_length=150)
+    preferred_date = models.CharField(max_length=100)
+    location = models.CharField(max_length=150, blank=True, null=True)
+    message = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.service}"
+    
+    class Meta:
+        verbose_name_plural = "Enquiries"
+    def __str__(self):
+        return self.topic
+
 

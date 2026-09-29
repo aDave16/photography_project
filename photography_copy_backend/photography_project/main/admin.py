@@ -17,6 +17,9 @@ from .models import (
     ChatbotConfiguration,
     WhatsAppConfiguration,
     Invoice,
+    ChatbotFAQ,
+    ChatbotKnowledge,
+    Enquiry,
 )
 
 
@@ -289,7 +292,7 @@ class ChatbotConfigurationAdmin(admin.ModelAdmin):
     list_editable = ['is_active']
     fieldsets = (
         ('Bot Settings', {
-            'fields': ('welcome_message', 'system_prompt', 'is_active')
+            'fields': ('welcome_message', 'fallback_message', 'system_prompt', 'is_active')
         }),
         ('FAQ Items', {
             'fields': ('faq_items',),
@@ -360,3 +363,46 @@ class InvoiceAdmin(admin.ModelAdmin):
         return self.readonly_fields
 
 
+# =============================================================================
+# 15. CHATBOT KNOWLEDGE ADMIN
+# =============================================================================
+@admin.register(ChatbotFAQ)
+class ChatbotFAQAdmin(admin.ModelAdmin):
+    list_display = ['question', 'display_order', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['question', 'answer']
+    list_editable = ['display_order', 'is_active']
+    readonly_fields = ['created_at', 'updated_at']
+    fieldsets = (
+        ('FAQ Info', {
+            'fields': ('question', 'answer')
+        }),
+        ('Settings', {
+            'fields': ('display_order', 'is_active')
+        }),
+    )
+
+@admin.register(ChatbotKnowledge)
+class ChatbotKnowledgeAdmin(admin.ModelAdmin):
+    list_display = ['topic', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['topic', 'content']
+    list_editable = ['is_active']
+    readonly_fields = ['created_at', 'updated_at']
+    fieldsets = (
+        ('Knowledge Info', {
+            'fields': ('topic', 'content')
+        }),
+        ('Settings', {
+            'fields': ('is_active',)
+        }),
+    )
+
+@admin.register(Enquiry)
+class EnquiryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'phone', 'service', 'preferred_date', 'status', 'created_at')
+    search_fields = ('name', 'email', 'phone', 'service', 'location')
+    list_filter = ('status', 'created_at')
+    list_editable = ('status',)
+    readonly_fields = ('created_at', 'updated_at')
+    date_hierarchy = 'created_at'

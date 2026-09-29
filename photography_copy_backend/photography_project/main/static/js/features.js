@@ -139,7 +139,7 @@
                 localStorage.removeItem('luxe_whatsapp_config');
             }
         }
-        
+
         const featureContainer = document.createElement('div');
         featureContainer.id = 'advanced-features-overlay';
         featureContainer.className = 'fixed inset-0 z-[2001] bg-dark/95 backdrop-blur-xl hidden items-center justify-center p-6';
@@ -245,26 +245,41 @@
         // REAL AI CHATBOT — OpenAI-powered via Django backend
         // ================================================================
         const chatMessages = document.getElementById('chat-messages');
+        let chatHistory = [];
 
         const appendMessage = (text, sender) => {
             if (!chatMessages) return;
+            chatHistory.push({ role: sender, text: text });
             const div = document.createElement('div');
             div.className = sender === 'user'
-                ? 'bg-gold/20 p-3 rounded-2xl rounded-br-none text-white/90 border border-gold/20 self-end ml-auto max-w-[85%]'
-                : 'bg-charcoal/50 p-3 rounded-2xl rounded-bl-none text-white/80 border border-white/5 self-start max-w-[85%]';
-            div.innerText = text;
+                ? 'shrink-0 bg-gold/20 p-3 md:p-4 rounded-2xl rounded-br-none text-white/90 border border-gold/20 self-end ml-auto max-w-[85%] leading-relaxed shadow-sm'
+                : 'shrink-0 bg-charcoal/80 p-3 md:p-4 rounded-2xl rounded-bl-none text-white/90 border border-white/5 self-start mr-auto max-w-[85%] leading-relaxed whitespace-pre-wrap shadow-sm text-left';
+
+            if (sender === 'ai') {
+                const escapeHTML = str => str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+                let escapedText = escapeHTML(text);
+                let htmlFormat = escapedText
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gold">$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-gold underline" target="_blank">$1</a>');
+                div.innerHTML = htmlFormat;
+            } else {
+                div.innerText = text;
+            }
+
             chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            setTimeout(() => chatMessages.scrollTop = chatMessages.scrollHeight, 20);
         };
 
         const showTyping = () => {
             if (!chatMessages) return;
             const div = document.createElement('div');
             div.id = 'ai-typing';
-            div.className = 'bg-charcoal/50 p-3 rounded-2xl rounded-bl-none text-white/50 border border-white/5 self-start max-w-[85%] italic text-xs';
-            div.innerText = 'LUXE AI is typing...';
+            div.className = 'shrink-0 bg-charcoal/80 p-3 md:p-4 rounded-2xl rounded-bl-none text-white/50 border border-white/5 self-start mr-auto max-w-[85%] italic text-xs shadow-sm flex items-center gap-2';
+            div.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-gold"></i><span>LUXE AI is thinking...</span>';
             chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            if (window.lucide) lucide.createIcons({ root: div });
+            setTimeout(() => chatMessages.scrollTop = chatMessages.scrollHeight, 20);
         };
 
         const removeTyping = () => {
@@ -277,6 +292,13 @@
             const message = chatInput.value.trim();
             if (!message) return;
 
+            chatInput.disabled = true;
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>';
+                if (window.lucide) lucide.createIcons({ root: sendBtn });
+            }
+
             // Show user message
             appendMessage(message, 'user');
             chatInput.value = '';
@@ -284,18 +306,32 @@
             // Show typing indicator
             showTyping();
 
+            const resetState = () => {
+                removeTyping();
+                chatInput.disabled = false;
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i data-lucide="send" class="w-5 h-5"></i>';
+                    if (window.lucide) lucide.createIcons({ root: sendBtn });
+                }
+                setTimeout(() => chatInput.focus(), 10);
+            };
+
             // Send to Django AI endpoint
             try {
+                const payloadHistory = chatHistory.slice(0, -1).slice(-6);
+                const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+                const csrfToken = csrfInput ? csrfInput.value : '';
                 const response = await fetch('/ai-chat/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
+                        'X-CSRFToken': csrfToken
                     },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({ message: message, history: payloadHistory })
                 });
 
-                removeTyping();
+                resetState();
 
                 if (!response.ok) {
                     appendMessage('Sorry, I am having trouble connecting right now. Please try again or contact us on WhatsApp.', 'ai');
@@ -306,7 +342,7 @@
                 appendMessage(data.reply || 'I apologize, I did not understand that. Could you rephrase?', 'ai');
 
             } catch (err) {
-                removeTyping();
+                resetState();
                 console.error('AI chat error:', err);
                 appendMessage('Sorry, I am having trouble connecting right now. Please try again or contact us on WhatsApp.', 'ai');
             }
@@ -314,41 +350,41 @@
             // If user mentioned booking/pricing, also open the booking widget
             const lowerMsg = message.toLowerCase();
             if (lowerMsg.includes('book') || lowerMsg.includes('price') || lowerMsg.includes('cost') || lowerMsg.includes('date')) {
-                setTimeout(openModule, 1500);
+                setTimeout(openModule, 2500);
             }
         };
 
-sendBtn?.addEventListener('click', (e) => {
+        sendBtn?.addEventListener('click', (e) => {
 
-    e.preventDefault();
+            e.preventDefault();
 
-    sendAiMessage();
+            sendAiMessage();
 
-});
+        });
 
-chatInput?.addEventListener('keypress', (e) => {
+        chatInput?.addEventListener('keypress', (e) => {
 
-    if (e.key === 'Enter') {
+            if (e.key === 'Enter') {
 
-        e.preventDefault();
+                e.preventDefault();
 
-        sendAiMessage();
+                sendAiMessage();
 
-    }
+            }
 
-});
+        });
         // Pricing Logic (Admin-Synchronized)
         const updatePricing = () => {
             const config = JSON.parse(localStorage.getItem('luxe_price_config') || '{"wedding":150000,"prewedding":55000,"commercial":40000,"portrait":18000,"hourly":7500,"travel":20000}');
             const waConfig = JSON.parse(localStorage.getItem('luxe_whatsapp_config') || '{"number":"919998001549","template":"Hi! I\'m inquiring about a {service} session. Est: {price}."}');
-            
+
             const base = config[pEvent.value] || parseInt(pEvent.options[pEvent.selectedIndex].dataset.price);
             const hrs = parseInt(pHours.value) || 0;
             const extra = Math.max(0, hrs - 4) * (config.hourly || 7500);
             const total = base + extra;
             pTotal.innerText = `₹${total.toLocaleString()}`;
-            
-            if(waBtn) {
+
+            if (waBtn) {
                 const serviceName = pEvent.options[pEvent.selectedIndex].text.split('(')[0].trim();
                 const msg = waConfig.template.replace('{service}', serviceName).replace('{price}', pTotal.innerText);
                 waBtn.href = `https://wa.me/${waConfig.number}?text=${encodeURIComponent(msg)}`;
@@ -370,17 +406,17 @@ chatInput?.addEventListener('keypress', (e) => {
         const renderCal = () => {
             if (!calGrid) return;
             calGrid.innerHTML = '';
-            
+
             const firstDayOfMonth = new Date(cYear, cMonth, 1).getDay();
             const daysInMonth = new Date(cYear, cMonth + 1, 0).getDate();
             const daysInPrevMonth = new Date(cYear, cMonth, 0).getDate();
             const booked = bookedDates;
             const today = new Date();
             const isCurrentMonth = today.getMonth() === cMonth && today.getFullYear() === cYear;
-            
+
             // Update month header
             calMonth.innerText = `${new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(cYear, cMonth))} ${cYear}`;
-            
+
             // Previous month days (for filling the first week)
             for (let i = firstDayOfMonth - 1; i >= 0; i--) {
                 const dayNum = daysInPrevMonth - i;
@@ -390,21 +426,21 @@ chatInput?.addEventListener('keypress', (e) => {
                 div.style.pointerEvents = 'none';
                 calGrid.appendChild(div);
             }
-            
+
             // Current month days
             for (let d = 1; d <= daysInMonth; d++) {
-                const ds = `${cYear}-${String(cMonth + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const ds = `${cYear}-${String(cMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const div = document.createElement('div');
                 div.innerText = d;
-                
+
                 // Build class list
                 let className = 'cal-day';
-                
+
                 // Check if today
                 if (isCurrentMonth && today.getDate() === d) {
                     className += ' today';
                 }
-                
+
                 // Check if booked
                 if (booked.includes(ds)) {
                     className += ' disabled';
@@ -414,22 +450,22 @@ chatInput?.addEventListener('keypress', (e) => {
                     if (selDate === ds) {
                         className += ' active';
                     }
-                    
+
                     div.onclick = () => {
                         document.querySelectorAll('.cal-day').forEach(e => e.classList.remove('active'));
                         div.classList.add('active');
                         selDate = ds;
                     };
                 }
-                
+
                 div.className = className;
                 calGrid.appendChild(div);
             }
-            
+
             // Next month days (to fill remaining grid cells - always show 6 rows)
             const totalCells = firstDayOfMonth + daysInMonth;
             const remainingCells = 42 - totalCells; // 6 rows × 7 columns = 42
-            
+
             for (let d = 1; d <= remainingCells; d++) {
                 const div = document.createElement('div');
                 div.innerText = d;
@@ -466,11 +502,13 @@ chatInput?.addEventListener('keypress', (e) => {
 
             // 1. Send booking to Django backend
             try {
+                const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+                const csrfToken = csrfInput ? csrfInput.value : '';
                 const response = await fetch('/ai-booking/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
+                        'X-CSRFToken': csrfToken
                     },
                     body: JSON.stringify({
                         name: name,
@@ -565,8 +603,28 @@ chatInput?.addEventListener('keypress', (e) => {
 
         const mainChatToggle = document.getElementById('chat-toggle');
         const mainChatWindow = document.getElementById('chat-window');
-        // AI Chat temporarily disabled
-        // if (mainChatToggle && mainChatWindow) mainChatToggle.onclick = () => mainChatWindow.classList.toggle('hidden');
+        const closeChatBtn = document.getElementById('close-chat');
+
+        const toggleChatModal = () => {
+            if (!mainChatWindow) return;
+            if (mainChatWindow.classList.contains('hidden')) {
+                mainChatWindow.classList.remove('hidden');
+                setTimeout(() => {
+                    mainChatWindow.classList.remove('opacity-0', 'scale-95');
+                    mainChatWindow.classList.add('opacity-100', 'scale-100');
+                    if (chatInput) chatInput.focus();
+                }, 10);
+            } else {
+                mainChatWindow.classList.remove('opacity-100', 'scale-100');
+                mainChatWindow.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    mainChatWindow.classList.add('hidden');
+                }, 300);
+            }
+        };
+
+        if (mainChatToggle) mainChatToggle.onclick = toggleChatModal;
+        if (closeChatBtn) closeChatBtn.onclick = toggleChatModal;
     };
 
     if (document.readyState === 'loading') {
