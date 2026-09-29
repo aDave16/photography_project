@@ -203,7 +203,7 @@
         
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <a href="http://127.0.0.1:8000/admin/main/inquiry/{{ inquiry.id }}/change/" 
+            <a href="{% if request %}{{ request.scheme }}://{{ request.get_host }}{% endif %}/admin/main/inquiry/{{ inquiry.id }}/change/" 
                class="admin-btn">View in Admin</a>
             <a href="mailto:{{ inquiry.email }}" class="admin-btn">Reply via Email</a>
         </div>

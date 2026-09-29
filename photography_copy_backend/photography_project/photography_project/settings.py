@@ -19,8 +19,13 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-local-dev-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split()
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split()
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Application definition
 
@@ -138,46 +143,82 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
+# ============================================================
+# STATIC FILES
+# ============================================================
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
+
 STATICFILES_DIRS = [
-    BASE_DIR / 'main' / 'static',
+    BASE_DIR / "main" / "static",
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Cloudinary Configuration
+
+# ============================================================
+# CLOUDINARY CONFIGURATION
+# ============================================================
+
 CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME")
 CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY")
 CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET")
 
-if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+if CLOUDINARY_CLOUD_NAME:
     CLOUDINARY_STORAGE = {
-        'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
-        'API_KEY': CLOUDINARY_API_KEY,
-        'API_SECRET': CLOUDINARY_API_SECRET,
+        "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
+        "API_KEY": CLOUDINARY_API_KEY,
+        "API_SECRET": CLOUDINARY_API_SECRET,
     }
-    STORAGES["default"] = {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    }
+else:
+    # Optional logic to prevent crash if backend accidentally calls it
+    CLOUDINARY_STORAGE = {}
 
 
-# Media files (User uploaded content)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
+# ============================================================
+# STORAGE CONFIGURATION
+# ============================================================
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Admin-uploaded media files -> Cloudinary
+# Static CSS/JS/assets -> WhiteNoise
 
+import sys
+from whitenoise.storage import ManifestStaticFilesStorage
+
+class WindowsFixWhiteNoiseStorage(ManifestStaticFilesStorage):
+    """
+    Fixes a known bug in Django + WhiteNoise on Windows where os.path.normpath 
+    resolves relative CSS URLs with backslashes, causing MissingFileError 
+    during collectstatic manifest generation.
+    """
+    manifest_strict = False
+    def hashed_name(self, name, content=None, filename=None):
+        try:
+            return super().hashed_name(name, content, filename)
+        except Exception:
+            return name
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage" if CLOUDINARY_CLOUD_NAME else "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "photography_project.settings.WindowsFixWhiteNoiseStorage",
+    },
+}
+
+# Compatibility required by django-cloudinary-storage==0.3.0
+STATICFILES_STORAGE = (
+    "photography_project.settings.WindowsFixWhiteNoiseStorage"
+)
+
+
+# ============================================================
+# MEDIA FILES
+# ============================================================
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
