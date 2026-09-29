@@ -179,6 +179,23 @@ else:
 # STORAGE CONFIGURATION
 # ============================================================
 
+import os
+from cloudinary_storage.storage import MediaCloudinaryStorage
+import cloudinary.uploader
+
+class SuffixFreeCloudinaryStorage(MediaCloudinaryStorage):
+    def _upload(self, name, content):
+        options = {
+            'use_filename': True, 
+            'unique_filename': False, 
+            'resource_type': self._get_resource_type(name), 
+            'tags': self.TAG
+        }
+        folder = os.path.dirname(name)
+        if folder:
+            options['folder'] = folder
+        return cloudinary.uploader.upload(content, **options)
+
 # Admin-uploaded media files -> Cloudinary
 # Static CSS/JS/assets -> WhiteNoise
 
@@ -200,7 +217,7 @@ class WindowsFixWhiteNoiseStorage(ManifestStaticFilesStorage):
 
 STORAGES = {
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage" if CLOUDINARY_CLOUD_NAME else "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "photography_project.settings.SuffixFreeCloudinaryStorage" if CLOUDINARY_CLOUD_NAME else "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": "photography_project.settings.WindowsFixWhiteNoiseStorage",

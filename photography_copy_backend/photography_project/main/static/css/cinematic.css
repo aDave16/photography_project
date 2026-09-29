@@ -640,9 +640,10 @@ body.page-loaded .page-wrapper {
 
 .gallery-lightbox img {
     max-width: 100%;
-    max-height: 80vh;
-    border-radius: 24px;
+    max-height: 95vh;
+    border-radius: 12px;
     box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
+    object-fit: contain;
 }
 
 .gallery-lightbox .lightbox-copy {
