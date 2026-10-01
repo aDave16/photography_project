@@ -280,7 +280,11 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 
 # Email configuration (for future email notifications)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+if DEBUG and os.getenv('EMAIL_HOST_PASSWORD', 'your-app-password') == 'your-app-password':
+    # Fallback to console email backend for local development without SMTP credentials
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'

@@ -11,14 +11,14 @@
         margin: 0 auto;
         padding: 20px;
     }
-    
+
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 20px;
         margin-bottom: 30px;
     }
-    
+
     .stat-card {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(20px);
@@ -30,13 +30,13 @@
         overflow: hidden;
         transition: all 0.3s ease;
     }
-    
+
     .stat-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
         border-color: rgba(212, 175, 55, 0.4);
     }
-    
+
     .stat-number {
         font-size: 2.5rem;
         font-weight: 700;
@@ -44,7 +44,7 @@
         margin-bottom: 8px;
         font-family: 'Playfair Display', serif;
     }
-    
+
     .stat-label {
         font-size: 0.85rem;
         color: rgba(255, 255, 255, 0.7);
@@ -52,13 +52,13 @@
         letter-spacing: 0.8px;
         font-weight: 500;
     }
-    
+
     .stat-icon {
         font-size: 2rem;
         margin-bottom: 12px;
         opacity: 0.8;
     }
-    
+
     .recent-activity {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(20px);
@@ -67,19 +67,19 @@
         padding: 30px;
         margin-bottom: 30px;
     }
-    
+
     .activity-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 30px;
     }
-    
+
     .activity-section {
         background: rgba(212, 175, 55, 0.05);
         border-radius: 12px;
         padding: 20px;
     }
-    
+
     .section-title {
         font-family: 'Playfair Display', serif;
         font-size: 1.25rem;
@@ -90,7 +90,7 @@
         align-items: center;
         gap: 10px;
     }
-    
+
     .section-title::before {
         content: '';
         width: 30px;
@@ -98,13 +98,15 @@
         background: var(--gold);
         display: inline-block;
     }
-    
+
     .data-table {
         width: 100%;
+        min-width: 800px;
+        white-space: nowrap;
         border-collapse: collapse;
         margin-top: 15px;
     }
-    
+
     .data-table th,
     .data-table td {
         padding: 12px;
@@ -113,7 +115,7 @@
         color: rgba(255, 255, 255, 0.8);
         font-size: 0.9rem;
     }
-    
+
     .data-table th {
         font-weight: 600;
         color: var(--gold);
@@ -121,11 +123,11 @@
         font-size: 0.8rem;
         letter-spacing: 0.5px;
     }
-    
+
     .data-table tr:hover {
         background: rgba(212, 175, 55, 0.05);
     }
-    
+
     .btn-primary {
         background: var(--gold);
         color: var(--dark-bg);
@@ -140,13 +142,13 @@
         text-decoration: none;
         display: inline-block;
     }
-    
+
     .btn-primary:hover {
         background: rgba(212, 175, 55, 0.9);
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
     }
-    
+
     .btn-secondary {
         background: transparent;
         color: var(--gold);
@@ -161,14 +163,14 @@
         text-decoration: none;
         display: inline-block;
     }
-    
+
     .btn-secondary:hover {
         background: var(--gold);
         color: var(--dark-bg);
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
     }
-    
+
     .search-bar {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(20px);
@@ -180,7 +182,7 @@
         gap: 15px;
         align-items: center;
     }
-    
+
     .search-input {
         background: transparent;
         border: 1px solid rgba(212, 175, 55, 0.3);
@@ -191,13 +193,13 @@
         width: 300px;
         transition: all 0.3s ease;
     }
-    
+
     .search-input:focus {
         outline: none;
         border-color: var(--gold);
         box-shadow: 0 0 0 10px rgba(212, 175, 55, 0.2);
     }
-    
+
     .filter-select {
         background: transparent;
         border: 1px solid rgba(212, 175, 55, 0.3);
@@ -207,13 +209,13 @@
         font-size: 0.9rem;
         transition: all 0.3s ease;
     }
-    
+
     .filter-select:focus {
         outline: none;
         border-color: var(--gold);
         box-shadow: 0 0 0 10px rgba(212, 175, 55, 0.2);
     }
-    
+
     .status-badge {
         padding: 4px 8px;
         border-radius: 20px;
@@ -222,52 +224,52 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-    
+
     .status-new {
         background: rgba(59, 130, 246, 0.2);
         color: #3b82f6;
     }
-    
+
     .status-confirmed {
         background: rgba(34, 197, 94, 0.2);
         color: #166534;
     }
-    
+
     .status-completed {
         background: rgba(16, 185, 129, 0.2);
         color: #15803d;
     }
-    
+
     .status-pending {
         background: rgba(251, 191, 36, 0.2);
         color: #d97706;
     }
-    
+
     .status-replied {
         background: rgba(212, 175, 55, 0.2);
         color: var(--gold);
     }
-    
+
     @media (max-width: 768px) {
         .dashboard-container {
             padding: 15px;
         }
-        
+
         .stats-grid {
             grid-template-columns: 1fr;
             gap: 15px;
         }
-        
+
         .activity-grid {
             grid-template-columns: 1fr;
             gap: 20px;
         }
-        
+
         .search-bar {
             flex-direction: column;
             align-items: stretch;
         }
-        
+
         .search-input {
             width: 100%;
         }
@@ -277,71 +279,72 @@
 
 {% block content %}
 <div class="dashboard-container" x-data="{ activeTab: 'overview' }">
-    
+
     <!-- Header -->
     <div class="text-center mb-12">
         <h1 class="text-4xl font-light playfair text-gold mb-4">Dashboard</h1>
         <p class="text-white/70 text-lg">Manage your photography business with real-time insights</p>
     </div>
-    
+
     <!-- Navigation Tabs -->
     <div class="flex flex-wrap justify-center gap-4 mb-8">
-        <button @click="activeTab = 'overview'" 
-                :class="activeTab === 'overview' ? 'bg-gold text-dark' : 'bg-transparent border border-gold text-gold'"
-                class="px-6 py-3 rounded-full text-sm uppercase tracking-[0.6em] font-medium transition-all duration-300">
+        <button @click="activeTab = 'overview'"
+            :class="activeTab === 'overview' ? 'bg-gold text-dark' : 'bg-transparent border border-gold text-gold'"
+            class="px-6 py-3 rounded-full text-sm uppercase tracking-[0.6em] font-medium transition-all duration-300">
             Overview
         </button>
-        <button @click="activeTab = 'bookings'" 
-                :class="activeTab === 'bookings' ? 'bg-gold text-dark' : 'bg-transparent border border-gold text-gold'"
-                class="px-6 py-3 rounded-full text-sm uppercase tracking-[0.6em] font-medium transition-all duration-300">
+        <button @click="activeTab = 'bookings'"
+            :class="activeTab === 'bookings' ? 'bg-gold text-dark' : 'bg-transparent border border-gold text-gold'"
+            class="px-6 py-3 rounded-full text-sm uppercase tracking-[0.6em] font-medium transition-all duration-300">
             Bookings
         </button>
-        <button @click="activeTab = 'inquiries'" 
-                :class="activeTab === 'inquiries' ? 'bg-gold text-dark' : 'bg-transparent border border-gold text-gold'"
-                class="px-6 py-3 rounded-full text-sm uppercase tracking-[0.6em] font-medium transition-all duration-300">
+        <button @click="activeTab = 'inquiries'"
+            :class="activeTab === 'inquiries' ? 'bg-gold text-dark' : 'bg-transparent border border-gold text-gold'"
+            class="px-6 py-3 rounded-full text-sm uppercase tracking-[0.6em] font-medium transition-all duration-300">
             Inquiries
         </button>
-        <button @click="activeTab = 'services'" 
-                :class="activeTab === 'services' ? 'bg-gold text-dark' : 'bg-transparent border border-gold text-gold'"
-                class="px-6 py-3 rounded-full text-sm uppercase tracking-[0.6em] font-medium transition-all duration-300">
+        <button @click="activeTab = 'services'"
+            :class="activeTab === 'services' ? 'bg-gold text-dark' : 'bg-transparent border border-gold text-gold'"
+            class="px-6 py-3 rounded-full text-sm uppercase tracking-[0.6em] font-medium transition-all duration-300">
             Services
         </button>
     </div>
-    
+
     <!-- Overview Section -->
-    <div x-show="activeTab === 'overview'" x-transition:enter="transition ease-out duration-300" x-transition:leave="transition ease-in duration-300">
+    <div x-show="activeTab === 'overview'" x-transition:enter="transition ease-out duration-300"
+        x-transition:leave="transition ease-in duration-300">
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">📅</div>
                 <div class="stat-number">{{ total_bookings }}</div>
                 <div class="stat-label">Total Bookings</div>
             </div>
-            
+
             <div class="stat-card">
                 <div class="stat-icon">📨</div>
                 <div class="stat-number">{{ total_inquiries }}</div>
                 <div class="stat-label">Total Inquiries</div>
             </div>
-            
+
             <div class="stat-card">
                 <div class="stat-icon">🎬</div>
                 <div class="stat-number">{{ total_services }}</div>
                 <div class="stat-label">Total Services</div>
             </div>
-            
+
             <div class="stat-card">
                 <div class="stat-icon">⭐</div>
                 <div class="stat-number">{{ total_testimonials }}</div>
                 <div class="stat-label">Testimonials</div>
             </div>
-            
+
             <div class="stat-card">
                 <div class="stat-icon">💰</div>
                 <div class="stat-number">₹{{ total_revenue|floatformat:0|intcomma }}</div>
                 <div class="stat-label">Total Revenue</div>
             </div>
         </div>
-        
+
         <!-- Recent Activity -->
         <div class="recent-activity">
             <h2 class="section-title">Recent Activity</h2>
@@ -356,14 +359,15 @@
                                 <div class="text-sm text-white/70">{{ booking.service.title }}</div>
                             </div>
                             <div class="text-right">
-                                <div class="status-badge status-{{ booking.status|lower }}">{{ booking.get_status_display }}</div>
+                                <div class="status-badge status-{{ booking.status|lower }}">{{
+                                    booking.get_status_display }}</div>
                                 <div class="text-xs text-white/50 mt-1">{{ booking.created_at|date:"M d, Y" }}</div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
-                
+
                 <div class="activity-section">
                     <h3 class="text-xl font-semibold text-gold mb-4">Recent Inquiries</h3>
                     <div class="space-y-3">
@@ -374,7 +378,8 @@
                                 <div class="text-sm text-white/70">{{ inquiry.get_event_type_display }}</div>
                             </div>
                             <div class="text-right">
-                                <div class="status-badge status-{% if inquiry.replied %}replied{% else %}new{% endif %}">
+                                <div
+                                    class="status-badge status-{% if inquiry.replied %}replied{% else %}new{% endif %}">
                                     {% if inquiry.replied %}Replied{% else %}New{% endif %}
                                 </div>
                                 <div class="text-xs text-white/50 mt-1">{{ inquiry.created_at|date:"M d, Y" }}</div>
@@ -386,18 +391,16 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Bookings Section -->
-    <div x-show="activeTab === 'bookings'" x-transition:enter="transition ease-out duration-300" x-transition:leave="transition ease-in duration-300">
+    <div x-show="activeTab === 'bookings'" x-transition:enter="transition ease-out duration-300"
+        x-transition:leave="transition ease-in duration-300">
         <div class="glass p-8">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold text-gold">Bookings Management</h2>
                 <div class="search-bar">
-                    <input type="text" 
-                           x-model="searchQuery" 
-                           @keyup.debounce.300ms="$el.closest('form').submit()"
-                           placeholder="Search bookings..." 
-                           class="search-input">
+                    <input type="text" x-model="searchQuery" @keyup.debounce.300ms="$el.closest('form').submit()"
+                        placeholder="Search bookings..." class="search-input">
                     <select x-model="statusFilter" @change="$el.closest('form').submit()" class="filter-select">
                         <option value="">All Status</option>
                         {% for status_value, status_label in status_choices %}
@@ -407,7 +410,7 @@
                     <a href="{% url 'dashboard_bookings' %}" class="btn-primary">Clear</a>
                 </div>
                 <form method="GET">
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto w-full">
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -428,15 +431,16 @@
                                     <td>{{ booking.service.title }}</td>
                                     <td>{{ booking.event_date|date:"M d, Y" }}</td>
                                     <td>
-                                        <span class="status-badge status-{{ booking.status|lower }}">{{ booking.get_status_display }}</span>
+                                        <span class="status-badge status-{{ booking.status|lower }}">{{
+                                            booking.get_status_display }}</span>
                                     </td>
                                     <td>
-                                        <button onclick="updateBookingStatus({{ booking.id }}, 'confirmed')" 
-                                                class="btn-secondary text-xs px-3 py-1">
+                                        <button onclick="updateBookingStatus({{ booking.id }}, 'confirmed')"
+                                            class="btn-secondary text-xs px-3 py-1">
                                             Confirm
                                         </button>
-                                        <button onclick="updateBookingStatus({{ booking.id }}, 'completed')" 
-                                                class="btn-secondary text-xs px-3 py-1 ml-2">
+                                        <button onclick="updateBookingStatus({{ booking.id }}, 'completed')"
+                                            class="btn-secondary text-xs px-3 py-1 ml-2">
                                             Complete
                                         </button>
                                     </td>
@@ -449,18 +453,16 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Inquiries Section -->
-    <div x-show="activeTab === 'inquiries'" x-transition:enter="transition ease-out duration-300" x-transition:leave="transition ease-in duration-300">
+    <div x-show="activeTab === 'inquiries'" x-transition:enter="transition ease-out duration-300"
+        x-transition:leave="transition ease-in duration-300">
         <div class="glass p-8">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold text-gold">Inquiries Management</h2>
                 <div class="search-bar">
-                    <input type="text" 
-                           x-model="searchQuery" 
-                           @keyup.debounce.300ms="$el.closest('form').submit()"
-                           placeholder="Search inquiries..." 
-                           class="search-input">
+                    <input type="text" x-model="searchQuery" @keyup.debounce.300ms="$el.closest('form').submit()"
+                        placeholder="Search inquiries..." class="search-input">
                     <select x-model="repliedFilter" @change="$el.closest('form').submit()" class="filter-select">
                         <option value="">All</option>
                         <option value="replied">Replied</option>
@@ -469,7 +471,7 @@
                     <a href="{% url 'dashboard_inquiries' %}" class="btn-primary">Clear</a>
                 </div>
                 <form method="GET">
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto w-full">
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -489,17 +491,18 @@
                                     </td>
                                     <td>{{ inquiry.get_event_type_display }}</td>
                                     <td>
-                                        <span class="status-badge status-{% if inquiry.replied %}replied{% else %}new{% endif %}">
+                                        <span
+                                            class="status-badge status-{% if inquiry.replied %}replied{% else %}new{% endif %}">
                                             {% if inquiry.replied %}Replied{% else %}New{% endif %}
                                         </span>
                                     </td>
                                     <td>
-                                        <button onclick="replyToInquiry({{ inquiry.id }})" 
-                                                class="btn-secondary text-xs px-3 py-1">
+                                        <button onclick="replyToInquiry({{ inquiry.id }})"
+                                            class="btn-secondary text-xs px-3 py-1">
                                             Reply
                                         </button>
-                                        <button onclick="deleteInquiry({{ inquiry.id }})" 
-                                                class="btn-secondary text-xs px-3 py-1 ml-2 text-red-500 border-red-500 hover:bg-red-600">
+                                        <button onclick="deleteInquiry({{ inquiry.id }})"
+                                            class="btn-secondary text-xs px-3 py-1 ml-2 text-red-500 border-red-500 hover:bg-red-600">
                                             Delete
                                         </button>
                                     </td>
@@ -512,18 +515,16 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Services Section -->
-    <div x-show="activeTab === 'services'" x-transition:enter="transition ease-out duration-300" x-transition:leave="transition ease-in duration-300">
+    <div x-show="activeTab === 'services'" x-transition:enter="transition ease-out duration-300"
+        x-transition:leave="transition ease-in duration-300">
         <div class="glass p-8">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold text-gold">Services Management</h2>
                 <div class="search-bar">
-                    <input type="text" 
-                           x-model="searchQuery" 
-                           @keyup.debounce.300ms="$el.closest('form').submit()"
-                           placeholder="Search services..." 
-                           class="search-input">
+                    <input type="text" x-model="searchQuery" @keyup.debounce.300ms="$el.closest('form').submit()"
+                        placeholder="Search services..." class="search-input">
                     <select x-model="featuredFilter" @change="$el.closest('form').submit()" class="filter-select">
                         <option value="">All Services</option>
                         <option value="featured">Featured</option>
@@ -531,12 +532,12 @@
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                     </select>
-                    <button onclick="window.location.href='{% url "dashboard_create_service" %}'" class="btn-primary">
+                    <button onclick="window.location.href='{% url " dashboard_create_service" %}'" class="btn-primary">
                         + Add Service
                     </button>
                 </div>
                 <form method="GET">
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto w-full">
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -558,26 +559,28 @@
                                     <td>{{ service.get_service_type_display }}</td>
                                     <td>₹{{ service.price|floatformat:0|intcomma }}</td>
                                     <td>
-                                        <span class="status-badge {% if service.is_featured %}status-featured{% else %}status-not-featured{% endif %}">
+                                        <span
+                                            class="status-badge {% if service.is_featured %}status-featured{% else %}status-not-featured{% endif %}">
                                             {% if service.is_featured %}Featured{% else %}Not Featured{% endif %}
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="status-badge {% if service.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                        <span
+                                            class="status-badge {% if service.is_active %}status-active{% else %}status-inactive{% endif %}">
                                             {% if service.is_active %}Active{% else %}Inactive{% endif %}
                                         </span>
                                     </td>
                                     <td>
-                                        <button onclick="toggleServiceFeatured({{ service.id }})" 
-                                                class="btn-secondary text-xs px-3 py-1">
+                                        <button onclick="toggleServiceFeatured({{ service.id }})"
+                                            class="btn-secondary text-xs px-3 py-1">
                                             {% if service.is_featured %}Unfeature{% else %}Feature{% endif %}
                                         </button>
-                                        <button onclick="toggleServiceActive({{ service.id }})" 
-                                                class="btn-secondary text-xs px-3 py-1 ml-2">
+                                        <button onclick="toggleServiceActive({{ service.id }})"
+                                            class="btn-secondary text-xs px-3 py-1 ml-2">
                                             {% if service.is_active %}Deactivate{% else %}Activate{% endif %}
                                         </button>
-                                        <button onclick="deleteService({{ service.id }})" 
-                                                class="btn-secondary text-xs px-3 py-1 ml-2 text-red-500 border-red-500 hover:bg-red-600">
+                                        <button onclick="deleteService({{ service.id }})"
+                                            class="btn-secondary text-xs px-3 py-1 ml-2 text-red-500 border-red-500 hover:bg-red-600">
                                             Delete
                                         </button>
                                     </td>
@@ -593,146 +596,93 @@
 </div>
 
 <script>
-// Dashboard JavaScript Functions
-function updateBookingStatus(bookingId, newStatus) {
-    fetch('/dashboard/update-booking-status/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            booking_id: bookingId,
-            status: newStatus
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.message || 'Error updating booking status');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating booking status');
-    });
-}
-
-function replyToInquiry(inquiryId) {
-    const replyMessage = prompt('Enter your reply message:');
-    if (replyMessage) {
-        fetch('/dashboard/update-inquiry-status/', {
+    // Dashboard JavaScript Functions
+    function updateBookingStatus(bookingId, newStatus) {
+        fetch('/dashboard/update-booking-status/', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                inquiry_id: inquiryId,
-                action: 'reply',
-                reply_message: replyMessage
+                booking_id: bookingId,
+                status: newStatus
             })
         })
-        .then(response => response.json())
-    .then(data => {
-            if (data.success) {
-                alert('Reply sent successfully!');
-                location.reload();
-            } else {
-                alert(data.message || 'Error sending reply');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error sending reply');
-        });
-    }
-}
-
-function deleteInquiry(inquiryId) {
-    if (confirm('Are you sure you want to delete this inquiry?')) {
-        fetch('/dashboard/update-inquiry-status/', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                inquiry_id: inquiryId,
-                action: 'delete'
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error updating booking status');
+                }
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert(data.message || 'Error deleting inquiry');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting inquiry');
-        });
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating booking status');
+            });
     }
-}
 
-function toggleServiceFeatured(serviceId) {
-    fetch('/dashboard/update-service/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            service_id: serviceId,
-            action: 'toggle_featured'
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.message || 'Error updating service');
+    function replyToInquiry(inquiryId) {
+        const replyMessage = prompt('Enter your reply message:');
+        if (replyMessage) {
+            fetch('/dashboard/update-inquiry-status/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    inquiry_id: inquiryId,
+                    action: 'reply',
+                    reply_message: replyMessage
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Reply sent successfully!');
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error sending reply');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error sending reply');
+                });
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating service');
-    });
-}
+    }
 
-function toggleServiceActive(serviceId) {
-    fetch('/dashboard/update-service/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            service_id: serviceId,
-            action: 'toggle_active'
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.message || 'Error updating service');
+    function deleteInquiry(inquiryId) {
+        if (confirm('Are you sure you want to delete this inquiry?')) {
+            fetch('/dashboard/update-inquiry-status/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    inquiry_id: inquiryId,
+                    action: 'delete'
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error deleting inquiry');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting inquiry');
+                });
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating service');
-    });
-}
+    }
 
-function deleteService(serviceId) {
-    if (confirm('Are you sure you want to delete this service?')) {
+    function toggleServiceFeatured(serviceId) {
         fetch('/dashboard/update-service/', {
             method: 'POST',
             headers: {
@@ -741,22 +691,75 @@ function deleteService(serviceId) {
             },
             body: JSON.stringify({
                 service_id: serviceId,
-                action: 'delete'
+                action: 'toggle_featured'
             })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert(data.message || 'Error deleting service');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting service');
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error updating service');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating service');
+            });
     }
-}
+
+    function toggleServiceActive(serviceId) {
+        fetch('/dashboard/update-service/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                service_id: serviceId,
+                action: 'toggle_active'
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error updating service');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating service');
+            });
+    }
+
+    function deleteService(serviceId) {
+        if (confirm('Are you sure you want to delete this service?')) {
+            fetch('/dashboard/update-service/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    service_id: serviceId,
+                    action: 'delete'
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error deleting service');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting service');
+                });
+        }
+    }
 </script>
 {% endblock %}

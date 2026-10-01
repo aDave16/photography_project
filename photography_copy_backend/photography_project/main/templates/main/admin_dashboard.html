@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Dhrumil Bajak Photography</title>
+    <title>Admin Dashboard|Dhrumil Bajak Photography</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
     <link
@@ -92,103 +92,21 @@
     </script>
 </head>
 
-<body x-data="adminLogic()" x-init="init()"
-    class="text-white selection:bg-gold/30 selection:text-white">
+<body x-data="adminLogic()" x-init="init()" class="text-white selection:bg-gold/30 selection:text-white">
 
     <!-- Django injects ALL model data here for Alpine.js to consume dynamically -->
+    <!-- prettier-ignore -->
     <script>
-        window.djangoBookings = [
-            {% for booking in bookings %}
-            {
-                id: {{ booking.id }},
-                name: "{{ booking.name|escapejs }}",
-                email: "{{ booking.email|escapejs }}",
-                date: "{{ booking.event_date|date:'Y-m-d'|default:'TBD' }}",
-                slot: "{{ booking.time_slot|default:'N/A'|escapejs }}",
-                service: "{{ booking.service.title|default:'Custom'|escapejs }}",
-                status: "{{ booking.status|escapejs }}"
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ];
-
-        window.djangoBookedDates = [
-            {% for booking in bookings %}
-            {% if booking.event_date %}
-            "{{ booking.event_date|date:'Y-m-d' }}"{% if not forloop.last %},{% endif %}
-            {% endif %}
-            {% endfor %}
-        ];
-
-        window.djangoReels = [
-            {% for reel in reels %}
-            {
-                id: {{ reel.id }},
-                title: "{{ reel.title|escapejs }}",
-                category: "{{ reel.category.name|default:''|escapejs }}",
-                thumbnail: "{% if reel.thumbnail %}{{ reel.thumbnail.url }}{% endif %}",
-                video: "{% if reel.video %}{{ reel.video.url }}{% endif %}",
-                duration: "{{ reel.duration|default:''|escapejs }}"
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ];
-
-        window.djangoGallery = [
-            {% for image in gallery_images %}
-            {
-                id: {{ image.id }},
-                title: "{{ image.title|escapejs }}",
-                image: "{% if image.image %}{{ image.image.url }}{% endif %}",
-                category: "{{ image.category.name|default:''|escapejs }}",
-                caption: "{{ image.caption|default:''|escapejs }}"
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ];
-
-        window.djangoServices = [
-            {% for service in services_list %}
-            {
-                id: {{ service.id }},
-                title: "{{ service.title|escapejs }}",
-                slug: "{{ service.slug|escapejs }}",
-                price: {{ service.price|default:0 }},
-                price_note: "{{ service.price_note|default:''|escapejs }}",
-                tagline: "{{ service.tagline|default:''|escapejs }}",
-                short_description: "{{ service.short_description|default:''|escapejs }}",
-                description: "{{ service.description|default:''|escapejs }}",
-                is_featured: {{ service.is_featured|yesno:"true,false" }},
-                is_active: {{ service.is_active|yesno:"true,false" }},
-                display_order: {{ service.display_order|default:0 }},
-                edit_url: "{% url 'dashboard_update_service' service.id %}"
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ];
-
-        window.djangoContacts = [
-            {% for contact in contacts %}
-            {
-                id: {{ contact.id }},
-                name: "{{ contact.name|escapejs }}",
-                email: "{{ contact.email|escapejs }}",
-                subject: "{{ contact.subject|default:''|escapejs }}",
-                message: "{{ contact.message|default:''|escapejs }}",
-                is_read: {{ contact.is_read|yesno:"true,false" }},
-                created_at: "{{ contact.created_at|date:'Y-m-d H:i' }}"
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ];
-
-        window.djangoTestimonials = [
-            {% for t in testimonials_list %}
-            {
-                id: {{ t.id }},
-                name: "{{ t.client_name|escapejs }}",
-                text: "{{ t.testimonial|escapejs }}",
-                rating: {{ t.rating|default:0 }},
-                role: "{{ t.client_role|default:''|escapejs }}"
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ];
+        // Native JSON serialization injected directly from Django to prevent Prettier formatting corruption
+        window.djangoBookings = {{ bookings_json | safe }};
+        window.djangoBookedDates = {{ booked_dates_json | safe }};
+        window.djangoReels = {{ reels_json | safe }};
+        window.djangoGallery = {{ gallery_json | safe }};
+        window.djangoServices = {{ services_json | safe }};
+        window.djangoContacts = {{ contacts_json | safe }};
+        window.djangoTestimonials = {{ testimonials_json | safe }};
     </script>
+
 
     <div class="flex h-screen overflow-hidden">
 
@@ -247,7 +165,8 @@
                     Manage Video Reels
                 </button>
 
-                <div class="pt-4 pb-2 px-4"><span class="text-[10px] uppercase tracking-[0.3em] text-white/30 font-bold">Studio Ops</span></div>
+                <div class="pt-4 pb-2 px-4"><span
+                        class="text-[10px] uppercase tracking-[0.3em] text-white/30 font-bold">Studio Ops</span></div>
 
                 <a href="{% url 'admin_bookings' %}"
                     class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group"
@@ -281,7 +200,7 @@
                     Revenue & Pricing
                 </a>
 
-                <a href="{% url 'admin_contacts' %}"
+                <a href="{% url 'admin_ai_concierge' %}"
                     class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group"
                     :class="currentTab === 'ai_settings' ? 'bg-white/5 text-gold border border-gold/20' : 'text-white/60 hover:bg-white/5 hover:text-white'">
                     <i data-lucide="sparkles" class="w-5 h-5"
@@ -297,7 +216,8 @@
                     WhatsApp Integration
                 </a>
 
-                <a href="{% url 'admin_contacts' %}"
+                <!-- Use explicitly financial_cloud_overview instead of admin_contacts -->
+                <a href="{% url 'financial_cloud_overview' %}"
                     class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group"
                     :class="currentTab === 'invoices' ? 'bg-white/5 text-gold border border-gold/20' : 'text-white/60 hover:bg-white/5 hover:text-white'">
                     <i data-lucide="file-spreadsheet" class="w-5 h-5"
@@ -325,14 +245,16 @@
             {% if messages %}
             <div class="px-6 md:px-10 pt-4 space-y-2 z-40">
                 {% for message in messages %}
-                <div class="text-sm px-4 py-3 rounded-xl border {% if message.tags == 'error' %}border-red-500/30 bg-red-500/10 text-red-300{% else %}border-gold/30 bg-gold/10 text-gold{% endif %}">{{ message }}</div>
+                <div
+                    class="text-sm px-4 py-3 rounded-xl border {% if message.tags == 'error' %}border-red-500/30 bg-red-500/10 text-red-300{% else %}border-gold/30 bg-gold/10 text-gold{% endif %}">
+                    {{ message }}</div>
                 {% endfor %}
             </div>
             {% endif %}
 
             <!-- Top Header -->
             <header
-                class="h-20 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/5 flex items-center justify-between px-6 md:px-10 z-30 sticky top-0">
+                class="h-16 md:h-20 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/5 flex items-center justify-between px-4 md:px-10 z-30 sticky top-0 w-full overflow-x-hidden">
                 <div class="flex items-center gap-4">
                     <button @click="mobileMenu = true"
                         class="lg:hidden text-white/70 hover:text-white bg-white/5 p-2 rounded-lg">
@@ -346,7 +268,8 @@
 
                 <div class="flex items-center gap-6">
                     <div class="hidden sm:block text-right">
-                        <p class="text-sm font-medium">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p class="text-sm font-medium">{{ request.user.get_full_name|default:request.user.username }}
+                        </p>
                         <p class="text-xs text-gold tracking-widest uppercase mt-0.5">Administrator</p>
                     </div>
                     <div
@@ -357,7 +280,7 @@
             </header>
 
             <!-- Content Area Scrollable -->
-            <div class="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth relative">
+            <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 scroll-smooth relative w-full overflow-x-hidden">
 
                 <div class="max-w-6xl mx-auto pb-20">
 
@@ -386,7 +309,8 @@
                         <!-- KPIs Grid -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
                             <!-- Stat 1: Total Bookings -->
-                            <div @click="currentTab = 'manage_bookings'" class="dash-card p-6 flex flex-col justify-between h-40 cursor-pointer transition-colors hover:border-gold/30">
+                            <div @click="currentTab = 'manage_bookings'"
+                                class="dash-card p-6 flex flex-col justify-between h-40 cursor-pointer transition-colors hover:border-gold/30">
                                 <div class="flex items-center justify-between">
                                     <h4 class="text-xs tracking-[0.2em] font-medium text-white/50 uppercase">Total
                                         Bookings</h4>
@@ -400,7 +324,8 @@
                                 </div>
                             </div>
                             <!-- Stat 2: Total Photographs -->
-                            <div @click="currentTab = 'upload_images'" class="dash-card p-6 flex flex-col justify-between h-40 cursor-pointer transition-colors hover:border-gold/30">
+                            <div @click="currentTab = 'upload_images'"
+                                class="dash-card p-6 flex flex-col justify-between h-40 cursor-pointer transition-colors hover:border-gold/30">
                                 <div class="flex items-center justify-between">
                                     <h4 class="text-xs tracking-[0.2em] font-medium text-white/50 uppercase">Total
                                         Photographs</h4>
@@ -414,7 +339,8 @@
                                 </div>
                             </div>
                             <!-- Stat 3: Video Reels -->
-                            <div @click="currentTab = 'manage_videos'" class="dash-card p-6 flex flex-col justify-between h-40 cursor-pointer transition-colors hover:border-gold/30">
+                            <div @click="currentTab = 'manage_videos'"
+                                class="dash-card p-6 flex flex-col justify-between h-40 cursor-pointer transition-colors hover:border-gold/30">
                                 <div class="flex items-center justify-between">
                                     <h4 class="text-xs tracking-[0.2em] font-medium text-white/50 uppercase">Video Reels
                                     </h4>
@@ -435,31 +361,104 @@
                             <h4 class="text-lg font-medium tracking-wide mb-6">Recent Portfolio Updates</h4>
                             <div class="space-y-4">
                                 {% for photo in recent_gallery %}
-                                <div
-                                    class="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-gold/20">
+                                <div class="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-transparent hover:border-gold/20 relative"
+                                    x-data="{ openMenu: false }" @click.stop>
                                     <div class="flex items-center gap-4">
                                         <div class="w-12 h-12 rounded-lg bg-[#1a1a1a] overflow-hidden">
                                             {% if photo.image %}
-                                            <img src="{{ photo.image.url }}" alt="{{ photo.title }}" class="w-full h-full object-cover">
+                                            <img src="{{ photo.image.url }}" alt="{{ photo.title }}"
+                                                class="w-full h-full object-cover">
                                             {% else %}
                                             <div class="w-full h-full bg-white/5"></div>
                                             {% endif %}
                                         </div>
                                         <div>
-                                            <p class="font-medium">{{ photo.title }}
+                                            <p class="font-medium">
+                                                {{ photo.title }}
                                                 {% if photo.category %}
-                                                <span class="text-xs text-gold ml-2 py-0.5 px-2 bg-gold/10 rounded-full">{{ photo.category.name }}</span>
+                                                <span
+                                                    class="text-xs text-gold ml-2 py-0.5 px-2 bg-gold/10 rounded-full">
+                                                    {{ photo.category.name }}
+                                                </span>
+                                                {% else %}
+                                                <span
+                                                    class="text-xs text-white/50 ml-2 py-0.5 px-2 bg-white/10 rounded-full">
+                                                    Uncategorized
+                                                </span>
                                                 {% endif %}
                                             </p>
-                                            <p class="text-xs text-white/50 mt-1">Uploaded {{ photo.created_at|timesince }} ago</p>
+                                            <p class="text-xs text-white/50 mt-1">
+                                                {% if photo.created_at %}
+                                                Uploaded {{ photo.created_at|timesince }} ago
+                                                {% else %}
+                                                Date unavailable
+                                                {% endif %}
+                                            </p>
                                         </div>
                                     </div>
-                                    <button class="text-white/50 hover:text-white"><i data-lucide="more-horizontal"></i></button>
+
+                                    <!-- Dropdown Menu -->
+                                    <div class="relative">
+                                        <button @click="openMenu = !openMenu" @click.outside="openMenu = false"
+                                            class="text-white/50 hover:text-white focus:outline-none p-2 rounded-lg hover:bg-white/5 transition-colors z-10 relative">
+                                            <i data-lucide="more-horizontal"></i>
+                                        </button>
+
+                                        <div x-show="openMenu" style="display: none;" x-transition
+                                            class="absolute right-0 top-full mt-2 w-36 bg-[#0a0a0a] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden text-sm font-medium">
+                                            <a href="{% url 'edit_gallery_image' photo.id %}"
+                                                class="block w-full text-left px-4 py-2 hover:bg-white/5 text-white transition-colors">Edit</a>
+                                            <button
+                                                @click="$dispatch('open-delete-modal', { id: {{ photo.id }}, title: '{{ photo.title|escapejs }}' }); openMenu = false"
+                                                class="block w-full text-left px-4 py-2 hover:bg-red-500/10 text-red-500 transition-colors">Delete</button>
+                                        </div>
+                                    </div>
                                 </div>
                                 {% empty %}
                                 <p class="text-white/40 text-sm py-4">No recent uploads. Add images in Django Admin.</p>
                                 {% endfor %}
+
+                                <!-- Pagination controls for Recent Gallery -->
+                                {% if recent_gallery.has_other_pages %}
+                                <div class="flex justify-center items-center gap-2 pt-2">
+                                    {% if recent_gallery.has_previous %}
+                                    <a href="?page={{ recent_gallery.previous_page_number }}"
+                                        class="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-white/50 text-sm transition-colors">Previous</a>
+                                    {% endif %}
+                                    <span class="text-sm text-white/40 border border-white/5 rounded-lg px-3 py-1">Page
+                                        {{ recent_gallery.number }} of {{ recent_gallery.paginator.num_pages }}</span>
+                                    {% if recent_gallery.has_next %}
+                                    <a href="?page={{ recent_gallery.next_page_number }}"
+                                        class="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-white/50 text-sm transition-colors">Next</a>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
                             </div>
+
+                            <!-- Global Alpine Delete Modal for Images -->
+                            <div x-data="{ showImageDeleteModal: false, imageId: null, imageTitle: '', deleteUrl: '' }"
+                                @open-delete-modal.window="showImageDeleteModal = true; imageId = $event.detail.id; imageTitle = $event.detail.title; deleteUrl = `{% url 'delete_gallery_image' 0 %}`.replace('0', imageId)">
+
+                                <div x-show="showImageDeleteModal" style="display: none;"
+                                    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                                    <div @click.outside="showImageDeleteModal = false"
+                                        class="bg-[#111] border border-white/10 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
+                                        <h3 class="text-xl font-medium text-white mb-2">Delete this image?</h3>
+                                        <p class="text-white/50 text-sm mb-6">Are you sure you want to delete <span
+                                                class="text-gold" x-text="imageTitle"></span>? This action cannot be
+                                            undone.</p>
+
+                                        <form :action="deleteUrl" method="POST" class="flex justify-end gap-3">
+                                            {% csrf_token %}
+                                            <button type="button" @click="showImageDeleteModal = false"
+                                                class="px-5 py-2.5 rounded-full border border-white/20 text-white/70 hover:text-white hover:bg-white/5 text-xs uppercase tracking-widest font-semibold transition-all">Cancel</button>
+                                            <button type="submit"
+                                                class="px-6 py-2.5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg text-xs uppercase tracking-widest font-bold transition-all">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
 
                     </div>
@@ -470,11 +469,14 @@
                         x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
 
                         <div class="dash-card p-6 md:p-10 relative">
-                            <form action="{% url 'create_gallery_category' %}" method="post" enctype="multipart/form-data" class="space-y-8 max-w-4xl">
+                            <form action="{% url 'create_gallery_category' %}" method="post"
+                                enctype="multipart/form-data" class="space-y-8 max-w-4xl">
                                 {% csrf_token %}
                                 <!-- Name -->
                                 <div>
-                                    <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-3">Category Name</label>
+                                    <label
+                                        class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-3">Category
+                                        Name</label>
                                     <input type="text" name="name" required placeholder="e.g. Wedding, Portrait, etc."
                                         class="input-field w-full px-5 py-4 rounded-xl text-lg font-light playfair">
                                 </div>
@@ -482,7 +484,9 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <!-- Display Order -->
                                     <div>
-                                        <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-3">Display Order</label>
+                                        <label
+                                            class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-3">Display
+                                            Order</label>
                                         <input type="number" name="display_order" value="0"
                                             class="input-field w-full px-5 py-4 rounded-xl text-sm font-medium text-white/80">
                                     </div>
@@ -490,15 +494,19 @@
                                     <!-- Is Featured -->
                                     <div class="flex items-center gap-4 h-full pt-6">
                                         <label class="flex items-center gap-3 cursor-pointer group">
-                                            <input type="checkbox" name="is_featured" class="w-5 h-5 rounded border-white/10 bg-white/5 text-gold focus:ring-gold">
-                                            <span class="text-sm text-white/70 group-hover:text-white transition-colors">Featured Category</span>
+                                            <input type="checkbox" name="is_featured"
+                                                class="w-5 h-5 rounded border-white/10 bg-white/5 text-gold focus:ring-gold">
+                                            <span
+                                                class="text-sm text-white/70 group-hover:text-white transition-colors">Featured
+                                                Category</span>
                                         </label>
                                     </div>
                                 </div>
 
                                 <!-- Description -->
                                 <div>
-                                    <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-3">Description</label>
+                                    <label
+                                        class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-3">Description</label>
                                     <textarea name="description" rows="3"
                                         placeholder="Brief description of this category..."
                                         class="input-field w-full px-5 py-4 rounded-xl text-sm resize-none"></textarea>
@@ -506,8 +514,11 @@
 
                                 <!-- Cover Image -->
                                 <div>
-                                    <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-3">Cover Image</label>
-                                    <input type="file" name="cover_image" class="input-field w-full px-5 py-4 rounded-xl text-sm">
+                                    <label
+                                        class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-3">Cover
+                                        Image</label>
+                                    <input type="file" name="cover_image"
+                                        class="input-field w-full px-5 py-4 rounded-xl text-sm">
                                 </div>
 
                                 <div class="pt-6 border-t border-white/5 flex justify-end gap-4">
@@ -525,34 +536,151 @@
                         x-transition:enter-start="opacity-0 translate-y-4"
                         x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
 
-                        <form action="{% url 'dashboard_bulk_upload' %}" method="post" enctype="multipart/form-data">
+                        <form action="{% url 'dashboard_bulk_upload' %}" method="post" enctype="multipart/form-data"
+                            x-data="{
+                                isUploading: false,
+                                uploadIndex: 0,
+                                totalFiles: 0,
+                                results: [],
+                                selectedFiles: [],
+                                isDragging: false,
+                                init() {
+                                    this.$watch('selectedFiles', val => {
+                                        this.totalFiles = val.length;
+                                    });
+                                },
+                                async startUpload(e) {
+                                    if(this.selectedFiles.length === 0||!e.target.category.value) return;
+                                    
+                                    this.isUploading = true;
+                                    this.results = [];
+                                    this.uploadIndex = 0;
+                                    
+                                    const category = e.target.category.value;
+                                    const csrfToken = e.target.querySelector('[name=csrfmiddlewaretoken]').value;
+                                    const uploadUrl = e.target.action;
+                                    
+                                    for(let i=0; i < this.selectedFiles.length; i++) {
+                                        this.uploadIndex = i + 1;
+                                        const file = this.selectedFiles[i];
+                                        
+                                        const formData = new FormData();
+                                        formData.append('category', category);
+                                        formData.append('images', file);
+                                        formData.append('csrfmiddlewaretoken', csrfToken);
+                                        
+                                        try {
+                                            const response = await fetch(uploadUrl, {
+                                                method: 'POST',
+                                                body: formData,
+                                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                                            });
+                                            if (response.ok) {
+                                                this.results.push({ name: file.name, status: 'success' });
+                                            } else {
+                                                this.results.push({ name: file.name, status: 'failed', error: 'Server error' });
+                                            }
+                                        } catch (err) {
+                                            this.results.push({ name: file.name, status: 'failed', error: 'Network error' });
+                                        }
+                                    }
+                                    
+                                    this.isUploading = false;
+                                    this.selectedFiles = [];
+                                    if (e.target.images) {
+                                        e.target.images.value = '';
+                                    }
+                                }
+                            }" @submit.prevent="startUpload($event)" class="relative">
                             {% csrf_token %}
                             <!-- Select Gallery First -->
-                            <div class="mb-8 flex flex-wrap gap-4 items-center justify-between">
+                            <div class="mb-8 flex flex-wrap gap-4 items-center justify-between pointer-events-auto"
+                                :class="isUploading ? 'opacity-50 pointer-events-none' : ''">
                                 <div>
-                                    <label class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Select Target Category</label>
+                                    <label
+                                        class="block text-xs uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Select
+                                        Target Category</label>
                                     <select name="category" required
-                                        class="input-field w-64 px-4 py-2.5 rounded-lg text-sm text-white focus:border-gold">
-                                        <option value="" disabled selected>Select category...</option>
+                                        class="input-field w-64 px-4 py-2.5 rounded-lg text-sm text-white focus:border-gold bg-[#0a0a0a]">
+                                        <option value="" disabled selected class="bg-[#1a1a1a] text-white/50">Select
+                                            category...</option>
                                         {% for cat in gallery_categories %}
-                                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                        <option value="{{ cat.id }}" class="bg-[#1a1a1a] text-white">{{ cat.name }}
+                                        </option>
                                         {% empty %}
-                                        <option disabled>No categories yet. Create one first!</option>
+                                        <option disabled class="bg-[#1a1a1a] text-white/50">No categories yet. Create
+                                            one first!</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                             </div>
 
                             <!-- Main Upload Area -->
-                            <div class="dash-card p-6 md:p-10">
+                            <div class="dash-card p-6 md:p-10 relative overflow-hidden">
+                                <!-- Upload Overlay -->
+                                <div x-show="isUploading||results.length > 0" x-transition
+                                    class="absolute inset-0 bg-[#0a0a0a]/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-8 overflow-y-auto"
+                                    style="display: none;">
+                                    <div x-show="isUploading" class="flex flex-col items-center text-center">
+                                        <svg class="w-12 h-12 text-gold animate-spin mb-4"
+                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                            </path>
+                                        </svg>
+                                        <h3 class="text-xl font-light playfair text-white mb-2"
+                                            x-text="`Uploading ${uploadIndex} of ${totalFiles}...`"></h3>
+                                        <p class="text-white/50 text-sm">Please do not close this window</p>
+                                    </div>
+                                    <div x-show="!isUploading && results.length > 0" class="w-full max-w-lg">
+                                        <h3 class="text-xl font-light playfair text-white mb-6 text-center">Upload
+                                            Complete</h3>
+                                        <div class="space-y-3 mb-8 max-h-48 overflow-y-auto pr-2">
+                                            <template x-for="res in results">
+                                                <div
+                                                    class="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
+                                                    <span class="text-sm truncate mr-4 font-medium"
+                                                        :class="res.status === 'success' ? 'text-white' : 'text-red-400 font-semibold'"
+                                                        x-text="res.name"></span>
+                                                    <div class="flex items-center gap-2 shrink-0 text-sm">
+                                                        <span x-show="res.status === 'success'"
+                                                            class="text-green-400 flex items-center gap-2"><svg
+                                                                class="w-5 h-5" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                            </svg></span>
+                                                        <span x-show="res.status === 'failed'"
+                                                            class="text-red-400 font-medium flex items-center gap-2"><svg
+                                                                class="w-5 h-5" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                            </svg> Upload failed</span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <div class="flex justify-center">
+                                            <button type="button"
+                                                @click="results = []; isUploading = false; totalFiles = 0;"
+                                                class="px-8 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors uppercase tracking-widest text-xs font-bold border border-transparent hover:border-gold/20">Upload
+                                                More</button>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Dropzone -->
                                 <div class="dropzone rounded-2xl p-10 md:p-16 flex flex-col items-center justify-center text-center cursor-pointer relative"
-                                    x-data="{ isDragging: false }"
                                     @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false"
                                     @drop.prevent="isDragging = false">
 
                                     <input type="file" name="images" multiple accept="image/*" required
-                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                        @change="selectedFiles = Array.from($event.target.files)"
+                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                        :disabled="isUploading">
 
                                     <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-[#1a1a1a] to-[#2a2a2a] shadow-lg flex items-center justify-center mb-6 border border-white/5 transition-transform"
                                         :class="isDragging ? 'scale-110 border-gold' : ''">
@@ -560,14 +688,29 @@
                                             :class="isDragging ? 'text-gold' : 'text-white/50'"></i>
                                     </div>
 
-                                    <h3 class="text-xl font-light playfair mb-2">Select images to upload</h3>
-                                    <p class="text-sm text-white/40 mb-6">Click to browse or drag and drop files</p>
-                                    <span class="bg-white/5 px-6 py-2 rounded-full text-xs font-semibold tracking-widest uppercase text-white/80 transition-colors">Select Files</span>
+                                    <h3 class="text-xl font-light playfair mb-2"
+                                        x-text="totalFiles > 0 ? `${totalFiles} images selected` : 'Select images to upload'">
+                                    </h3>
+                                    <p class="text-sm text-white/40 mb-6" x-show="totalFiles === 0">Click to browse or
+                                        drag and drop files</p>
+
+                                    <div class="flex flex-col gap-2 w-full max-w-sm mt-4 text-left"
+                                        x-show="totalFiles > 0 && !isUploading">
+                                        <div class="max-h-24 overflow-y-auto space-y-1 mb-4 hidden md:block">
+                                            <template x-for="f in selectedFiles">
+                                                <p class="text-xs text-white/60 truncate" x-text="f.name"></p>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <span x-show="totalFiles === 0"
+                                        class="bg-white/5 px-6 py-2 rounded-full text-xs font-semibold tracking-widest uppercase text-white/80 transition-colors">Select
+                                        Files</span>
                                 </div>
 
                                 <div class="pt-6 border-t border-white/5 flex justify-end">
-                                    <button type="submit"
-                                        class="px-8 py-3 rounded-full bg-gold hover:bg-yellow-400 text-black shadow-[0_4px_15px_rgba(212,175,55,0.4)] text-sm uppercase tracking-widest font-bold transition-all transform hover:-translate-y-0.5">
+                                    <button type="submit" :disabled="isUploading||totalFiles === 0"
+                                        class="px-8 py-3 rounded-full bg-gold hover:bg-yellow-400 hover:text-black disabled:opacity-50 disabled:hover:bg-gold text-black shadow-[0_4px_15px_rgba(212,175,55,0.4)] text-sm uppercase tracking-widest font-bold transition-all transform hover:-translate-y-0.5">
                                         Start Upload
                                     </button>
                                 </div>
@@ -593,9 +736,9 @@
                         </div>
 
                         <!-- Video Table Wrapper -->
-                        <div class="dash-card overflow-hidden">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm text-white/70">
+                        <div class="dash-card overflow-hidden w-full">
+                            <div class="overflow-x-auto w-full">
+                                <table class="w-full min-w-[700px] text-left text-sm text-white/70">
                                     <thead
                                         class="text-xs uppercase tracking-[0.2em] bg-white/5 border-b border-white/10 text-white/50">
                                         <tr>
@@ -609,9 +752,8 @@
                                         {% for reel in reels %}
                                         <tr class="hover:bg-white/5 transition-colors group">
                                             <td class="px-6 py-4 w-32">
-                                                <div
-                                                    {% if reel.thumbnail %}
-                                                    <img src="{{ reel.thumbnail.url }}" class="w-full h-full object-cover">
+                                                <div {% if reel.thumbnail %} <img src="{{ reel.thumbnail.url }}"
+                                                    class="w-full h-full object-cover">
                                                     {% endif %}
                                                     <div
                                                         class="absolute inset-0 flex items-center justify-center bg-black/30">
@@ -631,7 +773,8 @@
                                             <td class="px-6 py-4">
                                                 {% if reel.category %}
                                                 <span
-                                                    class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs">{{ reel.category.name }}</span>
+                                                    class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs">{{
+                                                    reel.category.name }}</span>
                                                 {% endif %}
                                             </td>
                                             <td class="px-6 py-4 text-right">
@@ -652,7 +795,8 @@
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="4" class="px-6 py-8 text-center text-white/40">No videos uploaded yet. Add reels in Django Admin.</td>
+                                            <td colspan="4" class="px-6 py-8 text-center text-white/40">No videos
+                                                uploaded yet. Add reels in Django Admin.</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -672,7 +816,8 @@
                                 x-transition:enter-end="opacity-100 scale-100"
                                 class="dash-card w-full max-w-2xl bg-[#0a0a0a] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
 
-                                <div class="px-8 py-6 border-b border-white/5 flex items-center justify-between">
+                                <div
+                                    class="px-6 md:px-8 py-5 md:py-6 border-b border-white/5 flex items-center justify-between">
                                     <h3 class="text-xl playfair">Add New Video Reel</h3>
                                     <button @click="showVideoModal = false"
                                         class="text-white/30 hover:text-white transition-colors">
@@ -680,8 +825,9 @@
                                     </button>
                                 </div>
 
-                                <div class="p-8">
-                                    <form action="{% url 'dashboard_add_reel' %}" method="post" enctype="multipart/form-data" class="space-y-6">
+                                <div class="p-4 md:p-8 overflow-y-auto max-h-[75vh]">
+                                    <form action="{% url 'dashboard_add_reel' %}" method="post"
+                                        enctype="multipart/form-data" class="space-y-6">
                                         {% csrf_token %}
                                         <!-- Row 1: Title & Event Name -->
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -689,7 +835,8 @@
                                                 <label
                                                     class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Video
                                                     Title</label>
-                                                <input type="text" name="title" required placeholder="e.g. Sangeet Highlights"
+                                                <input type="text" name="title" required
+                                                    placeholder="e.g. Sangeet Highlights"
                                                     class="input-field w-full px-4 py-3 rounded-xl text-sm">
                                             </div>
                                             <div>
@@ -708,7 +855,8 @@
                                         <!-- Video File -->
                                         <div>
                                             <label
-                                                class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Video File (MP4)</label>
+                                                class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Video
+                                                File (MP4)</label>
                                             <input type="file" name="video" required accept="video/mp4"
                                                 class="input-field w-full px-4 py-3 rounded-xl text-sm">
                                         </div>
@@ -756,10 +904,11 @@
                     <div x-show="currentTab === 'manage_bookings'" x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-y-4"
                         x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
-                        <div class="dash-card overflow-hidden">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm text-white/70">
-                                    <thead class="text-xs uppercase tracking-[0.2em] bg-white/5 border-b border-white/10 text-white/50">
+                        <div class="dash-card overflow-hidden w-full">
+                            <div class="overflow-x-auto w-full">
+                                <table class="w-full min-w-[800px] text-left text-sm text-white/70">
+                                    <thead
+                                        class="text-xs uppercase tracking-[0.2em] bg-white/5 border-b border-white/10 text-white/50">
                                         <tr>
                                             <th class="px-6 py-4">Client</th>
                                             <th class="px-6 py-4">Date / Slot</th>
@@ -780,17 +929,25 @@
                                                     <p class="text-[10px] text-gold uppercase" x-text="b.slot"></p>
                                                 </td>
                                                 <td class="px-6 py-4">
-                                                    <span class="text-[10px] bg-white/5 px-2 py-1 rounded" x-text="b.service"></span>
+                                                    <span class="text-[10px] bg-white/5 px-2 py-1 rounded"
+                                                        x-text="b.service"></span>
                                                 </td>
                                                 <td class="px-6 py-4 text-center">
-                                                    <span class="text-[9px] uppercase font-bold tracking-widest px-2 py-1 rounded-full border" 
-                                                          :class="b.status === 'confirmed' ? 'bg-green-500/10 text-green-500 border-green-500/20' : (b.status === 'completed' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20')"
-                                                          x-text="b.status"></span>
+                                                    <span
+                                                        class="text-[9px] uppercase font-bold tracking-widest px-2 py-1 rounded-full border"
+                                                        :class="b.status === 'confirmed' ? 'bg-green-500/10 text-green-500 border-green-500/20' : (b.status === 'completed' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20')"
+                                                        x-text="b.status"></span>
                                                 </td>
                                                 <td class="px-6 py-4 text-right">
                                                     <div class="flex justify-end gap-2">
-                                                        <button @click="updateBooking(b.id, 'confirmed')" class="p-2 text-green-500/70 hover:text-green-400 hover:bg-green-500/10 rounded-lg transition-all" title="Approve"><i data-lucide="check-circle" class="w-4 h-4"></i></button>
-                                                        <button @click="deleteBooking(b.id)" class="p-2 text-red-500/70 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                                        <button @click="updateBooking(b.id, 'confirmed')"
+                                                            class="p-2 text-green-500/70 hover:text-green-400 hover:bg-green-500/10 rounded-lg transition-all"
+                                                            title="Approve"><i data-lucide="check-circle"
+                                                                class="w-4 h-4"></i></button>
+                                                        <button @click="deleteBooking(b.id)"
+                                                            class="p-2 text-red-500/70 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                                                            title="Delete"><i data-lucide="trash-2"
+                                                                class="w-4 h-4"></i></button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -806,7 +963,7 @@
                         x-transition:enter-start="opacity-0 translate-y-4"
                         x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
                         <div class="glass rounded-2xl p-6 mt-10">
-    
+
                             <div class="flex items-center justify-between mb-6">
                                 <h2 class="text-2xl font-bold text-white">
                                     Customer Inquiries
@@ -824,7 +981,7 @@
                                 <div class="bg-black/30 border border-gray-700 rounded-xl p-5">
 
                                     <div class="flex justify-between items-start mb-3">
-                                        
+
                                         <div>
                                             <h3 class="text-lg font-semibold text-white">
                                                 {{ inquiry.name }}
@@ -868,7 +1025,7 @@
                                         </small>
 
                                         <a href="mailto:{{ inquiry.email }}"
-                                           class="bg-gold text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition">
+                                            class="bg-gold text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition">
                                             Reply
                                         </a>
 
@@ -888,34 +1045,45 @@
 
                         </div>
                     </div>
-                    
+
                     <!-- ================= CALENDAR CONTROL TAB ================= -->
                     <div x-show="currentTab === 'calendars'" x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-y-4"
                         x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
                         <div class="dash-card p-10">
                             <div class="flex justify-between items-center mb-8">
-                                <button @click="prevMonth()" class="text-gold"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+                                <button @click="prevMonth()" class="text-gold"><i data-lucide="chevron-left"
+                                        class="w-6 h-6"></i></button>
                                 <h3 class="playfair text-2xl tracking-widest" x-text="calMonthYear"></h3>
-                                <button @click="nextMonth()" class="text-gold"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
+                                <button @click="nextMonth()" class="text-gold"><i data-lucide="chevron-right"
+                                        class="w-6 h-6"></i></button>
                             </div>
                             <div class="grid grid-cols-7 gap-2">
                                 <template x-for="day in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']">
-                                    <div class="text-center text-[10px] uppercase font-bold text-white/30 py-2" x-text="day"></div>
+                                    <div class="text-center text-[10px] uppercase font-bold text-white/30 py-2"
+                                        x-text="day"></div>
                                 </template>
-                                <template x-for="p in paddingDays"><div class="aspect-square"></div></template>
+                                <template x-for="p in paddingDays">
+                                    <div class="aspect-square"></div>
+                                </template>
                                 <template x-for="d in daysInMonth">
-                                    <div @click="toggleBlock(d)" 
-                                         class="aspect-square flex items-center justify-center rounded-xl cursor-pointer transition-all border border-white/5 text-sm font-medium"
-                                         :class="isBooked(d) ? 'bg-red-500/20 text-red-400 border-red-500/20' : (isBlocked(d) ? 'bg-white/10 text-white/40' : 'bg-white/5 hover:border-gold hover:text-gold')">
+                                    <div @click="toggleBlock(d)"
+                                        class="aspect-square flex items-center justify-center rounded-xl cursor-pointer transition-all border border-white/5 text-sm font-medium"
+                                        :class="isBooked(d) ? 'bg-red-500/20 text-red-400 border-red-500/20' : (isBlocked(d) ? 'bg-white/10 text-white/40' : 'bg-white/5 hover:border-gold hover:text-gold')">
                                         <span x-text="d"></span>
                                     </div>
                                 </template>
                             </div>
                             <div class="mt-8 flex gap-6 text-[10px] uppercase tracking-widest font-bold justify-center">
-                                <div class="flex items-center gap-2"><div class="w-2 h-2 bg-green-500/20 rounded-full"></div> Available</div>
-                                <div class="flex items-center gap-2"><div class="w-2 h-2 bg-red-400 rounded-full"></div> Booked</div>
-                                <div class="flex items-center gap-2"><div class="w-2 h-2 bg-white/20 rounded-full"></div> Manual Block</div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-green-500/20 rounded-full"></div> Available
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-red-400 rounded-full"></div> Booked
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-white/20 rounded-full"></div> Manual Block
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -924,43 +1092,102 @@
                     <div x-show="currentTab === 'pricing'" x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-y-4"
                         x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div class="flex flex-col gap-8 mb-8">
                             <div class="dash-card p-8">
                                 <div class="flex justify-between items-center mb-6">
                                     <h3 class="playfair text-xl">Base Service Packages</h3>
-                                    <a href="{% url 'dashboard_create_service' %}" class="text-[10px] uppercase tracking-widest text-gold hover:text-white">+ Add Service</a>
+                                    <a href="{% url 'dashboard_create_service' %}"
+                                        class="text-[10px] uppercase tracking-widest text-gold hover:text-white">+ Add
+                                        Service</a>
                                 </div>
                                 <div class="space-y-6">
                                     <template x-for="svc in services" :key="svc.id">
                                         <div>
-                                            <label class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2" x-text="svc.title"></label>
+                                            <label
+                                                class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2"
+                                                x-text="svc.title"></label>
                                             <div class="relative">
-                                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gold">&#8377;</span>
-                                                <input type="number" x-model.number="pricing.byId[svc.id]" class="input-field w-full pl-8 pr-4 py-3 rounded-xl text-sm font-bold">
+                                                <span
+                                                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gold">&#8377;</span>
+                                                <input type="number" x-model.number="pricing.byId[svc.id]"
+                                                    class="input-field w-full pl-8 pr-4 py-3 rounded-xl text-sm font-bold">
                                             </div>
                                         </div>
                                     </template>
                                 </div>
                                 <div class="pt-6">
-                                    <button @click="savePricing()" class="w-full py-3 bg-gold text-black font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-white transition-all">Sync Prices to Website</button>
+                                    <button @click="savePricing()"
+                                        class="w-full py-3 bg-gold text-black font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-white transition-all">Sync
+                                        Prices to Website</button>
                                 </div>
                             </div>
                             <div class="dash-card p-8">
                                 <h3 class="playfair text-xl mb-6">Manage All Services</h3>
-                                <p class="text-white/40 text-xs mb-6 leading-relaxed">Edit title, descriptions, images, featured/active status, and display order. Changes appear instantly on the public services page, homepage, and booking flow.</p>
+                                <p class="text-white/40 text-xs mb-6 leading-relaxed">Edit title, descriptions, images,
+                                    featured/active status, and display order. Changes appear instantly on the public
+                                    services page, homepage, and booking flow.</p>
                                 <div class="space-y-3 max-h-[420px] overflow-y-auto pr-2">
-                                    <template x-for="svc in services" :key="'edit-' + svc.id">
-                                        <div class="flex items-center justify-between gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
-                                            <div class="min-w-0">
-                                                <p class="text-sm font-medium text-white truncate" x-text="svc.title"></p>
-                                                <p class="text-[10px] text-white/40 uppercase tracking-widest">
-                                                    <span x-text="svc.is_active ? 'Active' : 'Hidden'"></span>
-                                                    <span x-show="svc.is_featured"> · Featured</span>
+                                    {% for svc in services %}
+                                    <div
+                                        class="flex items-start justify-between gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
+                                        <div class="flex items-start gap-4 min-w-0">
+                                            {% if svc.get_main_image %}
+                                            <img src="{{ svc.get_main_image }}"
+                                                class="w-16 h-16 object-cover rounded shadow-lg flex-shrink-0"
+                                                alt="{{ svc.title }}">
+                                            {% else %}
+                                            <div
+                                                class="w-16 h-16 bg-white/10 rounded flex items-center justify-center shadow-lg flex-shrink-0">
+                                                <i data-lucide="image" class="w-6 h-6 text-white/50"></i>
+                                            </div>
+                                            {% endif %}
+                                            <div>
+                                                <p class="text-sm font-medium text-white truncate mb-1">{{ svc.title }}
+                                                </p>
+                                                <p
+                                                    class="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">
+                                                    <span class="text-white/70">Price: {{ svc.formatted_price }}</span>
+                                                    <span class="mx-1">&middot;</span>
+                                                    <span class="{% if svc.is_active %}text-gold{% endif %}">
+                                                        {% if svc.is_active %}
+                                                        Active
+                                                        {% else %}
+                                                        Inactive
+                                                        {% endif %}
+                                                    </span>
+                                                    <span class="mx-1">&middot;</span>
+                                                    <span class="{% if svc.is_featured %}text-gold{% endif %}">
+                                                        {% if svc.is_featured %}
+                                                        Featured: Yes
+                                                        {% else %}
+                                                        Featured: No
+                                                        {% endif %}
+                                                    </span>
+                                                    <span class="mx-1">&middot;</span>
+                                                    <span>Order: {{ svc.display_order }}</span>
+                                                </p>
+                                                <p class="text-xs text-white/60 mt-2 max-w-4xl line-clamp-2"
+                                                    title="{{ svc.get_short_description_text }}">
+                                                    {{ svc.get_short_description_text }}
                                                 </p>
                                             </div>
-                                            <a :href="svc.edit_url" class="shrink-0 text-[10px] uppercase tracking-widest text-gold border border-gold/30 px-4 py-2 rounded-lg hover:bg-gold hover:text-black transition-all">Edit</a>
                                         </div>
-                                    </template>
+                                        <div class="flex flex-shrink-0 flex-row gap-3 ml-4 items-center">
+                                            <a href="{% url 'dashboard_update_service' svc.id %}"
+                                                class="shrink-0 text-center text-[10px] uppercase tracking-widest text-gold border border-gold/30 px-6 py-2.5 rounded-lg hover:bg-gold hover:text-black transition-all">Edit</a>
+                                            <button type="button"
+                                                @click="if(confirm('Delete \u0022{{ svc.title|escapejs }}\u0022?\nThis action cannot be undone.')) window.deleteDbService({{ svc.id }})"
+                                                class="shrink-0 text-center text-[10px] uppercase tracking-widest text-red-500 border border-red-500/30 px-6 py-2.5 rounded-lg hover:bg-red-500 hover:text-white transition-all">Delete</button>
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="w-full text-center py-8 bg-white/5 rounded-xl border border-white/5">
+                                        <p class="text-xs text-white/50 mb-6">No services have been created yet.</p>
+                                        <a href="{% url 'dashboard_create_service' %}"
+                                            class="inline-block text-[10px] uppercase tracking-widest text-gold border border-gold/30 px-6 py-3 rounded-lg hover:bg-gold hover:text-black transition-all">+
+                                            Add Service</a>
+                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -971,24 +1198,105 @@
                         x-transition:enter-start="opacity-0 translate-y-4"
                         x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
                         <div class="dash-card p-8 max-w-4xl">
-                            <div class="mb-8">
-                                <label class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Chatbot Welcome Greeting</label>
-                                <textarea x-model="chatbot.greeting" rows="4" class="input-field w-full p-4 rounded-xl text-sm italic"></textarea>
+                            <!-- Toggle Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 border-b border-white/5 pb-8">
+                                <h4 class="col-span-full text-xs uppercase tracking-[0.2em] font-bold text-gold mb-2">
+                                    Capabilities Control Center</h4>
+
+                                <label
+                                    class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:border-gold/30 transition-all">
+                                    <span class="text-sm font-medium text-white/80">Master AI Switch</span>
+                                    <input type="checkbox" x-model="chatbot.is_active" class="accent-gold w-5 h-5">
+                                </label>
+
+                                <label
+                                    class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:border-gold/30 transition-all">
+                                    <span class="text-sm font-medium text-white/80">Lead Qualification</span>
+                                    <input type="checkbox" x-model="chatbot.lead_qualification_enabled"
+                                        class="accent-gold w-5 h-5">
+                                </label>
+
+                                <label
+                                    class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:border-gold/30 transition-all">
+                                    <span class="text-sm font-medium text-white/80">Service Recommend</span>
+                                    <input type="checkbox" x-model="chatbot.service_recommendation_enabled"
+                                        class="accent-gold w-5 h-5">
+                                </label>
+
+                                <label
+                                    class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:border-gold/30 transition-all">
+                                    <span class="text-sm font-medium text-white/80">Package Recommend</span>
+                                    <input type="checkbox" x-model="chatbot.package_recommendation_enabled"
+                                        class="accent-gold w-5 h-5">
+                                </label>
+
+                                <label
+                                    class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:border-gold/30 transition-all">
+                                    <span class="text-sm font-medium text-white/80">Pricing Quotes</span>
+                                    <input type="checkbox" x-model="chatbot.pricing_enabled"
+                                        class="accent-gold w-5 h-5">
+                                </label>
+
+                                <label
+                                    class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:border-gold/30 transition-all">
+                                    <span class="text-sm font-medium text-white/80">Availability Checks</span>
+                                    <input type="checkbox" x-model="chatbot.availability_enabled"
+                                        class="accent-gold w-5 h-5">
+                                </label>
+
+                                <label
+                                    class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:border-gold/30 transition-all">
+                                    <span class="text-sm font-medium text-white/80">Portfolio Ref</span>
+                                    <input type="checkbox" x-model="chatbot.portfolio_recommendation_enabled"
+                                        class="accent-gold w-5 h-5">
+                                </label>
+
+                                <label
+                                    class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:border-gold/30 transition-all">
+                                    <span class="text-sm font-medium text-white/80">Create Inquiries</span>
+                                    <input type="checkbox" x-model="chatbot.inquiry_creation_enabled"
+                                        class="accent-gold w-5 h-5">
+                                </label>
+                            </div>
+
+                            <div class="mb-8 items-stretch text-sm font-medium">
+                                <label
+                                    class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2">
+                                    System Prompt
+                                </label>
+                                <textarea x-model="chatbot.system_prompt" rows="3"
+                                    class="input-field w-full p-4 rounded-xl text-sm italic mb-4"></textarea>
+
+                                <label
+                                    class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Chatbot
+                                    Welcome Greeting</label>
+                                <textarea x-model="chatbot.welcome_message" rows="2"
+                                    class="input-field w-full p-4 rounded-xl text-sm italic"></textarea>
                             </div>
                             <div class="mb-8">
-                                <h4 class="text-xs uppercase tracking-widest font-bold text-gold mb-4">Knowledge Base (Auto-Responses)</h4>
+                                <h4 class="text-xs uppercase tracking-widest font-bold text-gold mb-4">Knowledge Base
+                                    (Auto-Responses)</h4>
                                 <div class="space-y-4">
                                     <template x-for="(faq, idx) in chatbot.faq" :key="idx">
                                         <div class="bg-white/5 border border-white/5 p-4 rounded-xl relative group">
-                                            <button @click="chatbot.faq.splice(idx, 1)" class="absolute top-4 right-4 text-white/10 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
-                                            <input x-model="faq.q" placeholder="The Question..." class="w-full bg-transparent border-b border-white/10 py-2 text-xs font-bold text-gold tracking-widest outline-none mb-2">
-                                            <textarea x-model="faq.a" placeholder="The AI's Answer..." class="w-full bg-transparent text-sm text-white/60 resize-none outline-none leading-relaxed" rows="2"></textarea>
+                                            <button @click="chatbot.faq.splice(idx, 1)"
+                                                class="absolute top-4 right-4 text-white/10 hover:text-red-500 transition-colors"><i
+                                                    data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                            <input x-model="faq.q" placeholder="The Question..."
+                                                class="w-full bg-transparent border-b border-white/10 py-2 text-xs font-bold text-gold tracking-widest outline-none mb-2">
+                                            <textarea x-model="faq.a" placeholder="The AI's Answer..."
+                                                class="w-full bg-transparent text-sm text-white/60 resize-none outline-none leading-relaxed"
+                                                rows="2"></textarea>
                                         </div>
                                     </template>
                                 </div>
-                                <button @click="chatbot.faq.push({q:'', a:''})" class="mt-4 text-[10px] uppercase tracking-widest text-white/40 hover:text-gold">+ Add FAQ entry</button>
+                                <button @click="chatbot.faq.push({q:'', a:''})"
+                                    class="mt-4 text-[10px] uppercase tracking-widest text-white/40 hover:text-gold">+
+                                    Add FAQ entry</button>
                             </div>
-                            <button @click="saveChat()" class="w-full py-3 bg-white/5 border border-gold/20 text-gold font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-gold hover:text-black transition-all">Update AI Intelligence</button>
+                            <button @click="saveChat()"
+                                class="w-full py-3 bg-white/5 border border-gold/20 text-gold font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-gold hover:text-black transition-all">Update
+                                AI Intelligence</button>
                         </div>
                     </div>
 
@@ -999,68 +1307,262 @@
                         <div class="dash-card p-8 max-w-2xl">
                             <div class="space-y-6">
                                 <div>
-                                    <label class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Business WhatsApp Number</label>
-                                    <input type="text" x-model="whatsapp.number" class="input-field w-full px-4 py-3 rounded-xl text-sm tracking-[0.1em]">
+                                    <label
+                                        class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Business
+                                        WhatsApp Number</label>
+                                    <input type="text" x-model="whatsapp.number"
+                                        class="input-field w-full px-4 py-3 rounded-xl text-sm tracking-[0.1em]">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Default booking message template</label>
-                                    <textarea x-model="whatsapp.template" rows="4" class="input-field w-full p-4 rounded-xl text-sm"></textarea>
-                                    <p class="text-[9px] text-white/30 mt-2">Use {service} and {price} as dynamic placeholders.</p>
+                                    <label
+                                        class="block text-[10px] uppercase tracking-[0.2em] text-white/50 font-medium mb-2">Default
+                                        booking message template</label>
+                                    <textarea x-model="whatsapp.template" rows="4"
+                                        class="input-field w-full p-4 rounded-xl text-sm"></textarea>
+                                    <p class="text-[9px] text-white/30 mt-2">Use {service} and {price} as dynamic
+                                        placeholders.</p>
                                 </div>
-                                <button @click="saveWA()" class="w-full py-4 bg-green-500/10 border border-green-500/20 text-green-500 font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-green-500 hover:text-black transition-all">Update Cloud Connectivity</button>
+                                <button @click="saveWA()"
+                                    class="w-full py-4 bg-green-500/10 border border-green-500/20 text-green-500 font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-green-500 hover:text-black transition-all">Update
+                                    Cloud Connectivity</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ================= INVOICES TAB ================= -->
+                    <!-- ================= FINANCIAL CLOUD TAB ================= -->
                     <div x-show="currentTab === 'invoices'" x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-y-4"
                         x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
-                        <div class="dash-card overflow-hidden">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm text-white/70">
-                                    <thead class="text-xs uppercase tracking-[0.2em] bg-white/5 border-b border-white/10 text-white/50">
-                                        <tr>
-                                            <th class="px-6 py-4">Invoice ID</th>
-                                            <th class="px-6 py-4">Client</th>
-                                            <th class="px-6 py-4">Amount</th>
-                                            <th class="px-6 py-4">Payment Status</th>
-                                            <th class="px-6 py-4 text-right">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-white/5">
-                                        <template x-for="inv in invoices" :key="inv.id">
-                                            <tr class="hover:bg-white/5 transition-colors group">
-                                                <td class="px-6 py-4 font-mono text-[11px] text-white/50" x-text="inv.id"></td>
-                                                <td class="px-6 py-4">
-                                                    <p class="font-medium text-white" x-text="inv.client"></p>
-                                                    <p class="text-[10px] text-white/40" x-text="inv.date"></p>
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <p class="text-gold font-bold text-base" x-text="inv.total"></p>
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <select @change="updateInvStatus(inv.id, $event.target.value)" 
-                                                            class="bg-transparent border-0 text-[10px] uppercase font-black tracking-widest cursor-pointer focus:ring-0"
-                                                            :class="inv.status === 'Paid' ? 'text-green-500' : 'text-red-500'">
-                                                        <option value="Paid" :selected="inv.status === 'Paid'" class="bg-[#111]">PAID</option>
-                                                        <option value="Unpaid" :selected="inv.status === 'Unpaid'" class="bg-[#111]">UNPAID</option>
-                                                        <option value="Refunded" :selected="inv.status === 'Refunded'" class="bg-[#111]">REFUNDED</option>
-                                                    </select>
-                                                </td>
-                                                <td class="px-6 py-4 text-right">
-                                                    <div class="flex justify-end gap-3">
-                                                        <button @click="deleteInv(inv.id)" class="p-2 text-white/20 hover:text-red-500 rounded-lg transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
+
+                        <!-- Top Summary Cards -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <!-- Revenue -->
+                            <div class="dash-card p-6 border-gold/20 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-[10px] tracking-[0.2em] font-bold text-white/50 uppercase">Total
+                                        Revenue</h4>
+                                    <div class="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                                        <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
+                                    </div>
+                                </div>
+                                <!-- prettier-ignore -->
+                                <span class="text-3xl font-light playfair text-green-400">&#8377;{{
+                                    total_revenue|default:"0" }}</span>
+                            </div>
+
+                            <!-- Pending/Remaining -->
+                            <div class="dash-card p-6 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-[10px] tracking-[0.2em] font-bold text-white/50 uppercase">Pending
+                                        Payments</h4>
+                                    <div class="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                                        <i data-lucide="clock" class="w-4 h-4 text-yellow-500"></i>
+                                    </div>
+                                </div>
+                                <!-- prettier-ignore -->
+                                <span class="text-3xl font-light playfair text-yellow-500">&#8377;{{
+                                    pending_payments_total|default:"0" }}</span>
+                            </div>
+
+                            <!-- Expenses -->
+                            <div class="dash-card p-6 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-[10px] tracking-[0.2em] font-bold text-white/50 uppercase">Total
+                                        Expenses</h4>
+                                    <div class="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                                        <i data-lucide="trending-down" class="w-4 h-4 text-red-400"></i>
+                                    </div>
+                                </div>
+                                <!-- prettier-ignore -->
+                                <span class="text-3xl font-light playfair text-red-400">&#8377;{{
+                                    total_expenses|default:"0" }}</span>
+                            </div>
+
+                            <!-- Net Profit -->
+                            <div class="dash-card p-6 flex flex-col justify-between"
+                                :class="{{ net_profit|default:'0' }} >= 0 ? 'border-gold/30' : 'border-red-500/30'">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-[10px] tracking-[0.2em] font-bold text-white/50 uppercase">Net
+                                        Profit</h4>
+                                    <div class="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center">
+                                        <i data-lucide="award" class="w-4 h-4 text-gold"></i>
+                                    </div>
+                                </div>
+                                <!-- prettier-ignore -->
+                                <span class="text-3xl font-light playfair"
+                                    :class="{{ net_profit|default:0 }} < 0 ? 'text-red-400' : 'text-gold'">&#8377;{{
+                                    net_profit|default:"0" }}</span>
                             </div>
                         </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <!-- Pending Balance Bookings -->
+                            <div class="dash-card p-8">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h3 class="playfair text-xl text-white">Pending Payments</h3>
+                                </div>
+                                <div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                                    {% for booking in fc_pending_bookings %}
+                                    <div
+                                        class="flex justify-between items-center p-4 bg-white/5 border border-white/5 rounded-xl hover:border-gold/20 transition-all">
+                                        <div>
+                                            <p class="font-medium text-white mb-1">{{ booking.name }}</p>
+                                            <!-- prettier-ignore -->
+                                            <p class="text-xs text-white/50">Total: &#8377;{{
+                                                booking.calculated_total_amount|default:"0" }} &middot; Paid: &#8377;{{
+                                                booking.total_paid|default:"0" }}</p>
+                                        </div>
+                                        <div class="text-right flex items-center justify-end gap-3">
+                                            <div class="text-right">
+                                                <!-- prettier-ignore -->
+                                                <p class="text-sm font-bold text-yellow-500 mb-1">Due: &#8377;{{
+                                                    booking.remaining_balance|default:"0" }}</p>
+                                                <button
+                                                    @click="$dispatch('open-payment-modal', { id: {{ booking.id }}, client: '{{ booking.name|escapejs }}', max: {{ booking.remaining_balance }} })"
+                                                    class="text-[10px] uppercase tracking-widest text-gold hover:text-white transition-colors">Record
+                                                    Payment</button>
+                                            </div>
+                                            <a href="{% url 'generate_invoice' booking.id %}" target="_blank"
+                                                class="p-2 bg-white/5 rounded hover:bg-gold/20 hover:text-gold transition-colors text-white/50"
+                                                title="Generate Invoice">
+                                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <p class="text-sm text-white/40 italic text-center py-4">No pending payments.</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Recent Expenses -->
+                            <div class="dash-card p-8">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h3 class="playfair text-xl text-white">Recent Expenses</h3>
+                                    <button @click="$dispatch('open-expense-modal')"
+                                        class="text-[10px] uppercase tracking-widest text-gold hover:text-white transition-colors border border-gold/30 px-4 py-2 rounded-lg">+
+                                        Add Expense</button>
+                                </div>
+                                <div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                                    {% for expense in fc_recent_expenses %}
+                                    <div
+                                        class="flex justify-between items-center p-4 bg-white/5 border border-white/5 rounded-xl hover:border-red-500/20 transition-all">
+                                        <div>
+                                            <p class="font-medium text-white mb-1">{{ expense.description }}</p>
+                                            <p class="text-[10px] uppercase tracking-widest text-white/50">{{
+                                                expense.category }} &middot; {{ expense.date }}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm font-bold text-red-400">-&#8377;{{ expense.amount }}</p>
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <p class="text-sm text-white/40 italic text-center py-4">No recent expenses.</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
+                </div>
+            </div>
+
+            <!-- Record Payment Modal -->
+            <div x-data="{ open: false, id: null, client: '', maxAmount: 0, amount: '', method: 'bank_transfer', notes: '' }"
+                @open-payment-modal.window="open = true; id = $event.detail.id; client = $event.detail.client; maxAmount = $event.detail.max; amount = $event.detail.max; method = 'bank_transfer'; notes = ''"
+                x-show="open"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                style="display: none;" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0">
+                <div class="dash-card p-8 w-full max-w-md border-gold/30" @click.outside="open = false">
+                    <h3 class="playfair text-xl text-white mb-2">Record Payment</h3>
+                    <p class="text-xs text-white/50 mb-6">Recording payment for: <span class="text-white font-medium"
+                            x-text="client"></span> (Due: &#8377;<span x-text="maxAmount"></span>)</p>
+
+                    <form method="POST"
+                        :action="`{% url 'financial_record_payment' %}` + (id ? '?booking_id=' + id : '')"
+                        class="space-y-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="booking_id" :value="id">
+                        <div>
+                            <label class="block text-[10px] uppercase text-white/50 mb-2">Amount (&#8377;)</label>
+                            <input type="number" name="amount" x-model="amount" required step="0.01" min="1"
+                                :max="maxAmount" class="form-input text-lg">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] uppercase text-white/50 mb-2">Payment Method</label>
+                            <select name="payment_method" x-model="method" required class="form-input">
+                                <option value="bank_transfer" class="bg-[#111]">Bank Transfer (NEFT/IMPS)</option>
+                                <option value="upi" class="bg-[#111]">UPI / GPay</option>
+                                <option value="cash" class="bg-[#111]">Cash</option>
+                                <option value="cheque" class="bg-[#111]">Cheque</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] uppercase text-white/50 mb-2">Notes</label>
+                            <input type="text" name="notes" x-model="notes" class="form-input"
+                                placeholder="Reference ID, UTR, or memo">
+                        </div>
+                        <div class="flex gap-4 mt-8">
+                            <button type="button" @click="open = false"
+                                class="flex-1 py-3 border border-white/20 rounded-lg text-xs uppercase tracking-widest text-white/70 hover:bg-white/5 transition-colors">Cancel</button>
+                            <button type="submit"
+                                class="flex-1 py-3 bg-gold text-black rounded-lg text-xs uppercase font-bold tracking-widest hover:bg-gold-light transition-colors">Confirm
+                                Payment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Add Expense Modal -->
+            <div x-data="{ open: false }" @open-expense-modal.window="open = true" x-show="open"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                style="display: none;" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0">
+                <div class="dash-card p-8 w-full max-w-md border-red-500/30" @click.outside="open = false">
+                    <h3 class="playfair text-xl text-white mb-6">Add Business Expense</h3>
+
+                    <form method="POST" action="{% url 'manage_expenses' %}" class="space-y-4">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-[10px] uppercase text-white/50 mb-2">Description</label>
+                            <input type="text" name="description" required class="form-input"
+                                placeholder="e.g. Travel, Props, Studio Rent">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] uppercase text-white/50 mb-2">Amount (&#8377;)</label>
+                                <input type="number" name="amount" required step="0.01" min="1"
+                                    class="form-input text-lg">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] uppercase text-white/50 mb-2">Date</label>
+                                <input type="date" name="date" required value="{% now 'Y-m-d' %}" class="form-input">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] uppercase text-white/50 mb-2">Category</label>
+                            <select name="category" required class="form-input">
+                                <option value="travel" class="bg-[#111]">Travel & Transport</option>
+                                <option value="equipment" class="bg-[#111]">Equipment & Gear</option>
+                                <option value="contractor" class="bg-[#111]">Second Shooter / Crew</option>
+                                <option value="marketing" class="bg-[#111]">Marketing</option>
+                                <option value="other" class="bg-[#111]">Other</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-4 mt-8">
+                            <button type="button" @click="open = false"
+                                class="flex-1 py-3 border border-white/20 rounded-lg text-xs uppercase tracking-widest text-white/70 hover:bg-white/5 transition-colors">Cancel</button>
+                            <button type="submit"
+                                class="flex-1 py-3 bg-red-500 text-white rounded-lg text-xs uppercase font-bold tracking-widest hover:bg-red-400 transition-colors">Save
+                                Expense</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -1072,6 +1574,50 @@
         </main>
     </div>
 
+    <!-- Inject serialized contexts for Javascript APIs -->
+    <script>
+        window.djangoServices = [
+            {% for svc in services %}
+        {
+            id: { { svc.id } },
+            title: "{{ svc.title|escapejs }}",
+                price: parseFloat("{{ svc.price|default:0 }}") || 0,
+                    is_active: { { svc.is_active | yesno: "true,false" } },
+            is_featured: { { svc.is_featured | yesno: "true,false" } },
+            edit_url: "{% url 'dashboard_update_service' svc.id %}"
+        } {% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        ];
+
+        window.deleteDbService = function (serviceId) {
+            const csrfAttr = document.querySelector('[name=csrfmiddlewaretoken]');
+            const token = csrfAttr ? csrfAttr.value : '';
+            if (!token) return alert('CSRF token missing');
+
+            const formData = new FormData();
+            formData.append('service_id', serviceId);
+            formData.append('action', 'delete');
+
+            fetch("{% url 'dashboard_service_ajax' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': token },
+                body: formData
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error deleting service');
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Connection error deleting service');
+                });
+        };
+    </script>
+
     <script>
         function adminLogic() {
             return {
@@ -1080,7 +1626,7 @@
                 bookings: [],
                 pricing: { byId: {} },
                 pricingSaving: false,
-                chatbot: { greeting: '', faq: [] },
+                chatbot: { greeting: '', faq: [], lead_qualification_enabled: true, service_recommendation_enabled: true, package_recommendation_enabled: true, pricing_enabled: true, availability_enabled: true, portfolio_recommendation_enabled: true, inquiry_creation_enabled: true, human_handoff_enabled: true, is_active: true },
                 whatsapp: { number: '', template: '' },
                 invoices: [],
                 gallery: [],
@@ -1090,7 +1636,7 @@
                 reels: [],
                 bookedDates: [],
                 manualBlocks: [],
-                
+
                 // Calendar State
                 cm: new Date().getMonth(),
                 cy: new Date().getFullYear(),
@@ -1142,7 +1688,7 @@
 
                 updateBooking(id, status) {
                     this.bookings = this.bookings.map(b => {
-                        if(b.id === id) {
+                        if (b.id === id) {
                             b.status = status;
                         }
                         return b;
@@ -1159,28 +1705,28 @@
                     const first = new Date(this.cy, this.cm, 1).getDay();
                     const total = new Date(this.cy, this.cm + 1, 0).getDate();
                     this.paddingDays = Array(first).fill(0);
-                    this.daysInMonth = Array.from({length: total}, (_, i) => i + 1);
-                    this.calMonthYear = new Intl.DateTimeFormat('en-US', {month: 'long', year: 'numeric'}).format(new Date(this.cy, this.cm));
+                    this.daysInMonth = Array.from({ length: total }, (_, i) => i + 1);
+                    this.calMonthYear = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(this.cy, this.cm));
                     setTimeout(() => lucide.createIcons(), 10);
                 },
 
-                prevMonth() { this.cm--; if(this.cm < 0) { this.cm = 11; this.cy--; } this.initCalendar(); },
-                nextMonth() { this.cm++; if(this.cm > 11) { this.cm = 0; this.cy++; } this.initCalendar(); },
-                
+                prevMonth() { this.cm--; if (this.cm < 0) { this.cm = 11; this.cy--; } this.initCalendar(); },
+                nextMonth() { this.cm++; if (this.cm > 11) { this.cm = 0; this.cy++; } this.initCalendar(); },
+
                 isBooked(d) {
-                    const ds = `${this.cy}-${String(this.cm+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    const ds = `${this.cy}-${String(this.cm + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     return this.bookedDates.includes(ds) || this.manualBlocks.includes(ds);
                 },
                 isBlocked(d) {
-                    const ds = `${this.cy}-${String(this.cm+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    const ds = `${this.cy}-${String(this.cm + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     return this.manualBlocks.includes(ds);
                 },
-                
+
                 toggleBlock(d) {
-                    const ds = `${this.cy}-${String(this.cm+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    const ds = `${this.cy}-${String(this.cm + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     // Don't allow unbooking actual bookings via calendar click
                     if (this.bookedDates.includes(ds)) return;
-                    
+
                     if (this.manualBlocks.includes(ds)) {
                         this.manualBlocks = this.manualBlocks.filter(x => x !== ds);
                     } else {
@@ -1224,9 +1770,28 @@
                     }
                 },
 
-                saveChat() {
-                    localStorage.setItem('luxe_chatbot_config', JSON.stringify(this.chatbot));
-                    alert('AI knowledge base updated.');
+                async saveChat() {
+                    try {
+                        const csrf = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+                        // Assuming ID is 1 or falls back to standard create
+                        const response = await fetch('/api/chatbot-config/1/', {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrf
+                            },
+                            body: JSON.stringify(this.chatbot)
+                        });
+
+                        if (response.ok) {
+                            alert('AI knowledge base and configuration updated.');
+                        } else {
+                            throw new Error('API failed');
+                        }
+                    } catch (e) {
+                        alert('API integration error. Attempted save.');
+                        console.error(e);
+                    }
                 },
 
                 saveWA() {
@@ -1236,7 +1801,7 @@
 
                 updateInvStatus(id, status) {
                     this.invoices = this.invoices.map(i => {
-                        if(i.id === id) i.status = status;
+                        if (i.id === id) i.status = status;
                         return i;
                     });
                     localStorage.setItem('luxe_invoices', JSON.stringify(this.invoices));

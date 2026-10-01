@@ -1,0 +1,323 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Assistant | Dhrumil Bajak Photography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,400&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            /* Fallback for browsers that do not support dvh */
+            height: 100vh;
+            /* Dynamic viewport height for mobile keyboards */
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+
+        .playfair {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Message Formatting styles inherited from existing logic */
+        a {
+            color: #D4AF37;
+        }
+
+        strong {
+            color: #D4AF37;
+            font-weight: bold;
+        }
+
+        /* Ensure images inside Markdown wrap properly */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0a0a0a',
+                        charcoal: '#1a1a1a',
+                        gold: '#D4AF37',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-dark flex flex-col w-full text-white overflow-hidden">
+    {% csrf_token %}
+
+    <!-- Header Section -->
+    <header
+        class="bg-dark/95 backdrop-blur-xl py-3 md:py-4 px-4 md:px-12 border-b border-gold/10 flex justify-between items-center shrink-0 w-full z-10 shadow-lg">
+        <div class="flex items-center gap-3 md:gap-4 min-w-0">
+            <a href="{% url 'home' %}"
+                class="text-white/80 hover:text-gold transition-colors flex items-center gap-1 md:gap-2 text-xs md:text-sm uppercase tracking-widest font-medium shrink-0 p-2 md:p-0">
+                <i data-lucide="arrow-left" class="w-5 h-5 md:w-4 md:h-4"></i>
+                <span class="hidden md:inline">Back</span>
+            </a>
+            <div class="w-px h-5 bg-gold/20 mx-1 md:mx-2 hidden md:block shrink-0"></div>
+            <a href="{% url 'home' %}"
+                class="text-base md:text-xl font-light tracking-[0.1em] md:tracking-[0.15em] uppercase playfair group text-white truncate min-w-0">
+                Dhrumil <span class="text-gold transition-all duration-500 group-hover:tracking-[0.2em]">Bajak</span>
+            </a>
+        </div>
+
+        <div class="flex items-center gap-2 md:gap-3 shrink-0 ml-3">
+            <i data-lucide="sparkles" class="w-4 h-4 md:w-5 md:h-5 text-gold"></i>
+            <span
+                class="text-[10px] md:text-xs font-semibold uppercase tracking-[0.2em] md:tracking-[0.25em] text-gold hidden sm:inline">AI
+                Assistant</span>
+        </div>
+    </header>
+
+    <!-- Main Chat Area -->
+    <!-- Use min-h-0 to allow flex child to shrink properly, enabling scrolling -->
+    <main
+        class="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden w-full max-w-4xl mx-auto px-4 py-6 md:p-6 space-y-6 scroll-smooth"
+        id="chat-messages">
+        <!-- Welcome Message -->
+        <div class="flex w-full">
+            <div
+                class="shrink-0 bg-charcoal/80 p-4 md:p-5 rounded-2xl rounded-bl-none text-white/90 border border-white/5 max-w-[95%] sm:max-w-[85%] md:max-w-[75%] leading-relaxed shadow-lg break-words">
+                {% if chatbot_config and chatbot_config.welcome_message %}
+                {{ chatbot_config.welcome_message }}
+                {% else %}
+                Welcome to Dhrumil Bajak Studio. I am here to assist with our cinematic photography services, packages,
+                and bookings. How may I help you today?
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Input Area -->
+    <footer class="bg-dark/95 border-t border-gold/10 shrink-0 w-full pb-safe">
+        <div class="max-w-4xl mx-auto p-3 md:p-6 w-full">
+            <div class="flex gap-2 w-full mx-auto relative bg-charcoal/50 md:bg-transparent rounded-3xl p-1 md:p-0">
+                <textarea id="chat-input" rows="1" placeholder="Message..."
+                    class="flex-1 min-w-0 bg-charcoal/80 border border-gold/20 rounded-2xl md:rounded-full px-4 md:px-6 py-3 md:py-4 text-white outline-none focus:border-gold transition-colors text-base resize-none shadow-inner items-center overflow-x-hidden overflow-y-auto max-h-32 md:max-h-40 leading-tight"
+                    style="min-height: 52px;"></textarea>
+                <button type="button" id="send-chat"
+                    class="w-[52px] h-[52px] md:w-14 md:h-14 flex items-center justify-center rounded-xl md:rounded-full bg-gold/10 text-gold hover:bg-gold hover:text-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0 self-end shadow-md focus:outline-none focus:ring-2 focus:ring-gold"
+                    aria-label="Send message">
+                    <i data-lucide="send" class="w-5 h-5 md:w-6 md:h-6"></i>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Check if iOS to apply specific fixes
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+            document.documentElement.style.height = '-webkit-fill-available';
+            document.body.style.height = '-webkit-fill-available';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatMessages = document.getElementById('chat-messages');
+            const chatInput = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('send-chat');
+            let chatHistory = [];
+
+            // Prevent mobile bounce scrolling on the document body, allow only in chat messages
+            document.body.addEventListener('touchmove', function (e) {
+                // If trying to scroll outside the chat messages, prevent it
+                if (!e.target.closest('#chat-messages') && !e.target.closest('#chat-input')) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            // Auto-resize textarea
+            chatInput.addEventListener('input', function () {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+                if (this.value.trim() === '') {
+                    this.style.height = '52px';
+                }
+            });
+
+            // Smooth scroll to bottom function
+            const scrollToBottom = () => {
+                if (chatMessages) {
+                    chatMessages.scrollTo({
+                        top: chatMessages.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                }
+            };
+
+            const appendMessage = (text, sender) => {
+                if (!chatMessages) return;
+                chatHistory.push({ role: sender, text: text });
+                const wrapper = document.createElement('div');
+                wrapper.className = sender === 'user' ? 'flex justify-end w-full' : 'flex justify-start w-full';
+
+                const div = document.createElement('div');
+                div.className = sender === 'user'
+                    ? 'shrink-0 bg-gold/20 p-4 md:p-5 rounded-2xl rounded-br-none text-white/95 border border-gold/20 max-w-[95%] sm:max-w-[85%] md:max-w-[75%] w-fit leading-relaxed shadow-lg break-words overflow-hidden'
+                    : 'shrink-0 bg-charcoal/80 p-4 md:p-5 rounded-2xl rounded-bl-none text-white/95 border border-white/5 max-w-[95%] sm:max-w-[85%] md:max-w-[75%] w-fit leading-relaxed shadow-lg whitespace-pre-wrap break-words overflow-hidden';
+
+                if (sender === 'ai') {
+                    const escapeHTML = str => str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+                    let escapedText = escapeHTML(text);
+                    let htmlFormat = escapedText
+                        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gold">$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-gold underline break-all" target="_blank">$1</a>')
+                        .replace(/\n\n/g, '<br><br>');
+                    div.innerHTML = htmlFormat;
+                } else {
+                    div.innerText = text;
+                }
+
+                wrapper.appendChild(div);
+                chatMessages.appendChild(wrapper);
+
+                // Allow DOM to update then scroll
+                setTimeout(scrollToBottom, 50);
+            };
+
+            const showTyping = () => {
+                if (!chatMessages) return;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex justify-start w-full';
+                wrapper.id = 'ai-typing-wrapper';
+
+                const div = document.createElement('div');
+                div.id = 'ai-typing';
+                div.className = 'shrink-0 bg-charcoal/80 p-3 md:p-4 rounded-2xl rounded-bl-none text-white/50 border border-white/5 max-w-[85%] italic text-xs md:text-sm shadow-md flex items-center gap-2 md:gap-3';
+                div.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 md:w-5 md:h-5 animate-spin text-gold shrink-0"></i><span class="truncate">LUXE AI is thinking...</span>';
+
+                wrapper.appendChild(div);
+                chatMessages.appendChild(wrapper);
+                lucide.createIcons({ root: div });
+
+                setTimeout(scrollToBottom, 50);
+            };
+
+            const removeTyping = () => {
+                const wrapper = document.getElementById('ai-typing-wrapper');
+                if (wrapper) wrapper.remove();
+            };
+
+            const sendAiMessage = async () => {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                chatInput.disabled = true;
+                if (sendBtn) {
+                    sendBtn.disabled = true;
+                    sendBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 md:w-6 md:h-6 animate-spin"></i>';
+                    lucide.createIcons({ root: sendBtn });
+                }
+
+                // Show user message
+                appendMessage(message, 'user');
+                chatInput.value = '';
+                chatInput.style.height = '52px';
+
+                // Show typing indicator
+                showTyping();
+
+                const resetState = () => {
+                    removeTyping();
+                    chatInput.disabled = false;
+                    if (sendBtn) {
+                        sendBtn.disabled = false;
+                        sendBtn.innerHTML = '<i data-lucide="send" class="w-5 h-5 md:w-6 md:h-6"></i>';
+                        lucide.createIcons({ root: sendBtn });
+                    }
+                    setTimeout(() => {
+                        // Avoid jarring mobile keyboard jump if not already focused
+                        if (window.innerWidth >= 768) {
+                            chatInput.focus();
+                        }
+                    }, 50);
+                };
+
+                // Send to Django AI endpoint
+                try {
+                    const payloadHistory = chatHistory.slice(0, -1).slice(-6); // pass the last 6 excluding the current
+                    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+                    const csrfToken = csrfInput ? csrfInput.value : '';
+                    const response = await fetch('/ai-chat/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ message: message, history: payloadHistory })
+                    });
+
+                    resetState();
+
+                    if (!response.ok) {
+                        appendMessage('Sorry, something went wrong. Please try again.', 'ai');
+                        return;
+                    }
+
+                    const data = await response.json();
+                    appendMessage(data.reply || 'I am sorry, I did not understand that. Could you rephrase it?', 'ai');
+
+                } catch (err) {
+                    resetState();
+                    console.error('AI chat error:', err);
+                    appendMessage('Sorry, something went wrong. Please try again.', 'ai');
+                }
+            };
+
+            sendBtn?.addEventListener('click', (e) => {
+                e.preventDefault();
+                chatInput.focus(); // On tap send, maintain keyboard
+                sendAiMessage();
+            });
+
+            // Handle keyboard enter specifically
+            chatInput?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendAiMessage();
+
+                    // Maintain focus on mobile after sending via Enter key to keep keyboard open
+                    setTimeout(() => chatInput.focus(), 10);
+                }
+            });
+
+            // Initial call to set correct sizing if needed
+            setTimeout(() => {
+                chatInput.style.height = '52px';
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>

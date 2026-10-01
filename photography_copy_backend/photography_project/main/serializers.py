@@ -215,7 +215,7 @@ class ChatbotConfigurationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ChatbotConfiguration
-        fields = ['id', 'welcome_message', 'system_prompt', 'faq_items', 'is_active', 'created_at', 'updated_at']
+        fields = '__all__'
         read_only_fields = ['created_at', 'updated_at']
 
 

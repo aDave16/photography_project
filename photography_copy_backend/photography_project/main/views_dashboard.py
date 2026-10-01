@@ -738,7 +738,7 @@ def delete_gallery_image(request, image_id):
         )
 
         return redirect(
-            'create_gallery_image'
+            'admin_dashboard'
         )
 
     return render(

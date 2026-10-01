@@ -3,6 +3,7 @@ from . import views
 from . import views_booking
 from . import views_inquiry
 from . import views_dashboard
+from . import views_financial
 
 urlpatterns = [
     # Authentication
@@ -68,8 +69,16 @@ path(
     path('dashboard/services/', views.admin_services, name='admin_services'),
     path('dashboard/services/manage/', views_dashboard.dashboard_services, name='dashboard_services'),
     path('dashboard/contacts/', views.admin_contacts, name='admin_contacts'),
+    path('dashboard/ai-concierge/', views.admin_ai_concierge, name='admin_ai_concierge'),
     path('dashboard/testimonials/', views.admin_testimonials, name='admin_testimonials'),
     
+    # Financial Cloud
+    path('dashboard/financial-cloud/', views_financial.financial_cloud_overview, name='financial_cloud_overview'),
+    path('dashboard/financial-cloud/record/', views_financial.record_payment, name='financial_record_payment'),
+    path('dashboard/financial-cloud/expenses/', views_financial.manage_expenses, name='manage_expenses'),
+    path('dashboard/financial-cloud/invoice/<int:booking_id>/', views_financial.generate_invoice, name='generate_invoice'),
+    path('dashboard/financial-cloud/reminder/<int:booking_id>/', views_financial.payment_reminder, name='payment_reminder'),
+
     # Dashboard create/update endpoints
     path('dashboard/create-service/', views.admin_create_service, name='dashboard_create_service'),
     path('dashboard/bulk-upload/', views_dashboard.dashboard_bulk_upload, name='dashboard_bulk_upload'),
@@ -79,6 +88,7 @@ path(
     path('dashboard/sync-s' \
     'ervice-prices/', views.dashboard_sync_service_prices, name='dashboard_sync_service_prices'),
     path('dashboard/update-inquiry-status/', views.dashboard_update_inquiry_status, name='dashboard_update_inquiry_status'),
+    path('dashboard/reply-inquiry/', views.dashboard_reply_inquiry, name='dashboard_reply_inquiry'),
 
     # AJAX endpoints for dynamic filtering
     
@@ -120,6 +130,7 @@ path(
 
     # AI Chatbot OpenAI conversation endpoint
     path('ai-chat/', views.ai_chat, name='ai_chat'),
+    path('chat/', views.chat_page, name='chat_page'),
 
     path(
     'portfolio/',

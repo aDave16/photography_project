@@ -428,6 +428,13 @@ class Booking(models.Model):
     time_slot = models.CharField(max_length=50, blank=True)
     location = models.CharField(max_length=300, blank=True)
     message = models.TextField(blank=True)
+    total_amount = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        null=True, 
+        blank=True, 
+        help_text="Custom total amount for this booking. If left blank, service price is used."
+    )
     budget_range = models.CharField(
         max_length=100,
         blank=True,
@@ -467,6 +474,23 @@ class Booking(models.Model):
         ],
         default='unpaid'
     )
+
+    @property
+    def calculated_total_amount(self):
+        if self.total_amount is not None:
+            return self.total_amount
+        if self.service and self.service.price:
+            return self.service.price
+        return 0
+
+    @property
+    def total_paid(self):
+        # We assume 'paid' status transactions count towards total paid
+        return sum(pt.amount for pt in self.payment_transactions.filter(status='paid'))
+
+    @property
+    def remaining_balance(self):
+        return max(self.calculated_total_amount - self.total_paid, 0)
 
     def __str__(self):
         return f"{self.name} | {self.get_service_display()} | {self.status}"
@@ -1004,6 +1028,16 @@ class ChatbotConfiguration(models.Model):
         default=True,
         help_text="Enable or disable chatbot"
     )
+    
+    # Specific AI Capabilities
+    lead_qualification_enabled = models.BooleanField(default=True, help_text="Allow AI to collect lead information")
+    service_recommendation_enabled = models.BooleanField(default=True, help_text="Allow AI to recommend specific services")
+    package_recommendation_enabled = models.BooleanField(default=True, help_text="Allow AI to recommend packages")
+    pricing_enabled = models.BooleanField(default=True, help_text="Allow AI to quote pricing")
+    availability_enabled = models.BooleanField(default=True, help_text="Allow AI to check calendar availability")
+    portfolio_recommendation_enabled = models.BooleanField(default=True, help_text="Allow AI to recommend gallery portfolios")
+    inquiry_creation_enabled = models.BooleanField(default=True, help_text="Allow AI to automatically create Inquiry records")
+    human_handoff_enabled = models.BooleanField(default=True, help_text="Allow AI to handoff complex questions to human agent")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
