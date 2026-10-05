@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard|Dhrumil Bajak Photography</title>
+    <title>Admin Dashboard | Dhrumil Bajak Photography</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
     <link
@@ -105,8 +105,8 @@
         window.djangoServices = {{ services_json | safe }};
         window.djangoContacts = {{ contacts_json | safe }};
         window.djangoTestimonials = {{ testimonials_json | safe }};
+        window.djangoInvoices = {{ invoices_json | safe }};
     </script>
-
 
     <div class="flex h-screen overflow-hidden">
 
@@ -216,7 +216,6 @@
                     WhatsApp Integration
                 </a>
 
-                <!-- Use explicitly financial_cloud_overview instead of admin_contacts -->
                 <a href="{% url 'financial_cloud_overview' %}"
                     class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-all group"
                     :class="currentTab === 'invoices' ? 'bg-white/5 text-gold border border-gold/20' : 'text-white/60 hover:bg-white/5 hover:text-white'">
@@ -418,7 +417,7 @@
                                 <p class="text-white/40 text-sm py-4">No recent uploads. Add images in Django Admin.</p>
                                 {% endfor %}
 
-                                <!-- Pagination controls for Recent Gallery -->
+                                <!-- Pagination controlss  for Recent Gallery -->
                                 {% if recent_gallery.has_other_pages %}
                                 <div class="flex justify-center items-center gap-2 pt-2">
                                     {% if recent_gallery.has_previous %}
@@ -550,7 +549,7 @@
                                     });
                                 },
                                 async startUpload(e) {
-                                    if(this.selectedFiles.length === 0||!e.target.category.value) return;
+                                    if(this.selectedFiles.length === 0 || !e.target.category.value) return;
                                     
                                     this.isUploading = true;
                                     this.results = [];
@@ -618,7 +617,7 @@
                             <!-- Main Upload Area -->
                             <div class="dash-card p-6 md:p-10 relative overflow-hidden">
                                 <!-- Upload Overlay -->
-                                <div x-show="isUploading||results.length > 0" x-transition
+                                <div x-show="isUploading || results.length > 0" x-transition
                                     class="absolute inset-0 bg-[#0a0a0a]/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-8 overflow-y-auto"
                                     style="display: none;">
                                     <div x-show="isUploading" class="flex flex-col items-center text-center">
@@ -709,7 +708,7 @@
                                 </div>
 
                                 <div class="pt-6 border-t border-white/5 flex justify-end">
-                                    <button type="submit" :disabled="isUploading||totalFiles === 0"
+                                    <button type="submit" :disabled="isUploading || totalFiles === 0"
                                         class="px-8 py-3 rounded-full bg-gold hover:bg-yellow-400 hover:text-black disabled:opacity-50 disabled:hover:bg-gold text-black shadow-[0_4px_15px_rgba(212,175,55,0.4)] text-sm uppercase tracking-widest font-bold transition-all transform hover:-translate-y-0.5">
                                         Start Upload
                                     </button>
@@ -1329,7 +1328,7 @@
                         </div>
                     </div>
 
-                    <!-- ================= FINANCIAL CLOUD TAB ================= -->
+                    <!-- ================= INVOICES TAB ================= -->
                     <div x-show="currentTab === 'invoices'" x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-y-4"
                         x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
@@ -1379,8 +1378,8 @@
                             </div>
 
                             <!-- Net Profit -->
-                            <div class="dash-card p-6 flex flex-col justify-between"
-                                :class="{{ net_profit|default:'0' }} >= 0 ? 'border-gold/30' : 'border-red-500/30'">
+                            <!-- prettier-ignore -->
+                            <div class="dash-card p-6 flex flex-col justify-between border-gold/30">
                                 <div class="flex items-center justify-between mb-4">
                                     <h4 class="text-[10px] tracking-[0.2em] font-bold text-white/50 uppercase">Net
                                         Profit</h4>
@@ -1389,180 +1388,63 @@
                                     </div>
                                 </div>
                                 <!-- prettier-ignore -->
-                                <span class="text-3xl font-light playfair"
-                                    :class="{{ net_profit|default:0 }} < 0 ? 'text-red-400' : 'text-gold'">&#8377;{{
-                                    net_profit|default:"0" }}</span>
+                                <span class="text-3xl font-light playfair text-gold">&#8377;{{ net_profit|default:"0"
+                                    }}</span>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                            <!-- Pending Balance Bookings -->
-                            <div class="dash-card p-8">
-                                <div class="flex items-center justify-between mb-6">
-                                    <h3 class="playfair text-xl text-white">Pending Payments</h3>
-                                </div>
-                                <div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                                    {% for booking in fc_pending_bookings %}
-                                    <div
-                                        class="flex justify-between items-center p-4 bg-white/5 border border-white/5 rounded-xl hover:border-gold/20 transition-all">
-                                        <div>
-                                            <p class="font-medium text-white mb-1">{{ booking.name }}</p>
-                                            <!-- prettier-ignore -->
-                                            <p class="text-xs text-white/50">Total: &#8377;{{
-                                                booking.calculated_total_amount|default:"0" }} &middot; Paid: &#8377;{{
-                                                booking.total_paid|default:"0" }}</p>
-                                        </div>
-                                        <div class="text-right flex items-center justify-end gap-3">
-                                            <div class="text-right">
-                                                <!-- prettier-ignore -->
-                                                <p class="text-sm font-bold text-yellow-500 mb-1">Due: &#8377;{{
-                                                    booking.remaining_balance|default:"0" }}</p>
-                                                <button
-                                                    @click="$dispatch('open-payment-modal', { id: {{ booking.id }}, client: '{{ booking.name|escapejs }}', max: {{ booking.remaining_balance }} })"
-                                                    class="text-[10px] uppercase tracking-widest text-gold hover:text-white transition-colors">Record
-                                                    Payment</button>
-                                            </div>
-                                            <a href="{% url 'generate_invoice' booking.id %}" target="_blank"
-                                                class="p-2 bg-white/5 rounded hover:bg-gold/20 hover:text-gold transition-colors text-white/50"
-                                                title="Generate Invoice">
-                                                <i data-lucide="file-text" class="w-4 h-4"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    {% empty %}
-                                    <p class="text-sm text-white/40 italic text-center py-4">No pending payments.</p>
-                                    {% endfor %}
-                                </div>
-                            </div>
-
-                            <!-- Recent Expenses -->
-                            <div class="dash-card p-8">
-                                <div class="flex items-center justify-between mb-6">
-                                    <h3 class="playfair text-xl text-white">Recent Expenses</h3>
-                                    <button @click="$dispatch('open-expense-modal')"
-                                        class="text-[10px] uppercase tracking-widest text-gold hover:text-white transition-colors border border-gold/30 px-4 py-2 rounded-lg">+
-                                        Add Expense</button>
-                                </div>
-                                <div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                                    {% for expense in fc_recent_expenses %}
-                                    <div
-                                        class="flex justify-between items-center p-4 bg-white/5 border border-white/5 rounded-xl hover:border-red-500/20 transition-all">
-                                        <div>
-                                            <p class="font-medium text-white mb-1">{{ expense.description }}</p>
-                                            <p class="text-[10px] uppercase tracking-widest text-white/50">{{
-                                                expense.category }} &middot; {{ expense.date }}</p>
-                                        </div>
-                                        <div class="text-right">
-                                            <p class="text-sm font-bold text-red-400">-&#8377;{{ expense.amount }}</p>
-                                        </div>
-                                    </div>
-                                    {% empty %}
-                                    <p class="text-sm text-white/40 italic text-center py-4">No recent expenses.</p>
-                                    {% endfor %}
-                                </div>
+                        <div class="dash-card overflow-hidden w-full">
+                            <div class="overflow-x-auto w-full">
+                                <table class="w-full min-w-[700px] text-left text-sm text-white/70">
+                                    <thead
+                                        class="text-xs uppercase tracking-[0.2em] bg-white/5 border-b border-white/10 text-white/50">
+                                        <tr>
+                                            <th class="px-6 py-4">Invoice ID</th>
+                                            <th class="px-6 py-4">Client</th>
+                                            <th class="px-6 py-4">Amount</th>
+                                            <th class="px-6 py-4">Payment Status</th>
+                                            <th class="px-6 py-4 text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/5">
+                                        <template x-for="inv in invoices" :key="inv.id">
+                                            <tr class="hover:bg-white/5 transition-colors group">
+                                                <td class="px-6 py-4 font-mono text-[11px] text-white/50"
+                                                    x-text="inv.id"></td>
+                                                <td class="px-6 py-4">
+                                                    <p class="font-medium text-white" x-text="inv.client"></p>
+                                                    <p class="text-[10px] text-white/40" x-text="inv.date"></p>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <p class="text-gold font-bold text-base" x-text="inv.total"></p>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <select @change="updateInvStatus(inv.id, $event.target.value)"
+                                                        class="bg-transparent border-0 text-[10px] uppercase font-black tracking-widest cursor-pointer focus:ring-0"
+                                                        :class="inv.status === 'Paid' ? 'text-green-500' : 'text-red-500'">
+                                                        <option value="Paid" :selected="inv.status === 'Paid'"
+                                                            class="bg-[#111]">PAID</option>
+                                                        <option value="Unpaid" :selected="inv.status === 'Unpaid'"
+                                                            class="bg-[#111]">UNPAID</option>
+                                                        <option value="Refunded" :selected="inv.status === 'Refunded'"
+                                                            class="bg-[#111]">REFUNDED</option>
+                                                    </select>
+                                                </td>
+                                                <td class="px-6 py-4 text-right">
+                                                    <div class="flex justify-end gap-3">
+                                                        <button @click="deleteInv(inv.id)"
+                                                            class="p-2 text-white/20 hover:text-red-500 rounded-lg transition-all"><i
+                                                                data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-
                     </div>
 
-                </div>
-            </div>
-
-            <!-- Record Payment Modal -->
-            <div x-data="{ open: false, id: null, client: '', maxAmount: 0, amount: '', method: 'bank_transfer', notes: '' }"
-                @open-payment-modal.window="open = true; id = $event.detail.id; client = $event.detail.client; maxAmount = $event.detail.max; amount = $event.detail.max; method = 'bank_transfer'; notes = ''"
-                x-show="open"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-                style="display: none;" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0">
-                <div class="dash-card p-8 w-full max-w-md border-gold/30" @click.outside="open = false">
-                    <h3 class="playfair text-xl text-white mb-2">Record Payment</h3>
-                    <p class="text-xs text-white/50 mb-6">Recording payment for: <span class="text-white font-medium"
-                            x-text="client"></span> (Due: &#8377;<span x-text="maxAmount"></span>)</p>
-
-                    <form method="POST"
-                        :action="`{% url 'financial_record_payment' %}` + (id ? '?booking_id=' + id : '')"
-                        class="space-y-4">
-                        {% csrf_token %}
-                        <input type="hidden" name="booking_id" :value="id">
-                        <div>
-                            <label class="block text-[10px] uppercase text-white/50 mb-2">Amount (&#8377;)</label>
-                            <input type="number" name="amount" x-model="amount" required step="0.01" min="1"
-                                :max="maxAmount" class="form-input text-lg">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] uppercase text-white/50 mb-2">Payment Method</label>
-                            <select name="payment_method" x-model="method" required class="form-input">
-                                <option value="bank_transfer" class="bg-[#111]">Bank Transfer (NEFT/IMPS)</option>
-                                <option value="upi" class="bg-[#111]">UPI / GPay</option>
-                                <option value="cash" class="bg-[#111]">Cash</option>
-                                <option value="cheque" class="bg-[#111]">Cheque</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] uppercase text-white/50 mb-2">Notes</label>
-                            <input type="text" name="notes" x-model="notes" class="form-input"
-                                placeholder="Reference ID, UTR, or memo">
-                        </div>
-                        <div class="flex gap-4 mt-8">
-                            <button type="button" @click="open = false"
-                                class="flex-1 py-3 border border-white/20 rounded-lg text-xs uppercase tracking-widest text-white/70 hover:bg-white/5 transition-colors">Cancel</button>
-                            <button type="submit"
-                                class="flex-1 py-3 bg-gold text-black rounded-lg text-xs uppercase font-bold tracking-widest hover:bg-gold-light transition-colors">Confirm
-                                Payment</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Add Expense Modal -->
-            <div x-data="{ open: false }" @open-expense-modal.window="open = true" x-show="open"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-                style="display: none;" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0">
-                <div class="dash-card p-8 w-full max-w-md border-red-500/30" @click.outside="open = false">
-                    <h3 class="playfair text-xl text-white mb-6">Add Business Expense</h3>
-
-                    <form method="POST" action="{% url 'manage_expenses' %}" class="space-y-4">
-                        {% csrf_token %}
-                        <div>
-                            <label class="block text-[10px] uppercase text-white/50 mb-2">Description</label>
-                            <input type="text" name="description" required class="form-input"
-                                placeholder="e.g. Travel, Props, Studio Rent">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[10px] uppercase text-white/50 mb-2">Amount (&#8377;)</label>
-                                <input type="number" name="amount" required step="0.01" min="1"
-                                    class="form-input text-lg">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] uppercase text-white/50 mb-2">Date</label>
-                                <input type="date" name="date" required value="{% now 'Y-m-d' %}" class="form-input">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] uppercase text-white/50 mb-2">Category</label>
-                            <select name="category" required class="form-input">
-                                <option value="travel" class="bg-[#111]">Travel & Transport</option>
-                                <option value="equipment" class="bg-[#111]">Equipment & Gear</option>
-                                <option value="contractor" class="bg-[#111]">Second Shooter / Crew</option>
-                                <option value="marketing" class="bg-[#111]">Marketing</option>
-                                <option value="other" class="bg-[#111]">Other</option>
-                            </select>
-                        </div>
-                        <div class="flex gap-4 mt-8">
-                            <button type="button" @click="open = false"
-                                class="flex-1 py-3 border border-white/20 rounded-lg text-xs uppercase tracking-widest text-white/70 hover:bg-white/5 transition-colors">Cancel</button>
-                            <button type="submit"
-                                class="flex-1 py-3 bg-red-500 text-white rounded-lg text-xs uppercase font-bold tracking-widest hover:bg-red-400 transition-colors">Save
-                                Expense</button>
-                        </div>
-                    </form>
                 </div>
             </div>
 
@@ -1628,7 +1510,7 @@
                 pricingSaving: false,
                 chatbot: { greeting: '', faq: [], lead_qualification_enabled: true, service_recommendation_enabled: true, package_recommendation_enabled: true, pricing_enabled: true, availability_enabled: true, portfolio_recommendation_enabled: true, inquiry_creation_enabled: true, human_handoff_enabled: true, is_active: true },
                 whatsapp: { number: '', template: '' },
-                invoices: [],
+                invoices: window.djangoInvoices || [],
                 gallery: [],
                 contacts: [],
                 testimonials: [],

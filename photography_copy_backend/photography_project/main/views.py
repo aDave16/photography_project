@@ -503,6 +503,7 @@ def _get_dashboard_stats():
     context['bookings_json'] = _get_bookings_json()
     context['reels_json'] = _get_reels_json()
     context['booked_dates_json'] = _get_booked_dates_json()
+    context['invoices_json'] = _get_invoices_json()
     
     # Generic dict serializations for the remaining models 
     context['gallery_json'] = json.dumps([
@@ -563,6 +564,31 @@ def _get_bookings_json():
             'slot': b.time_slot or 'N/A',
             'service': b.service.title if b.service else 'Custom',
             'status': b.status,
+        })
+    return json.dumps(data)
+
+
+def _get_invoices_json():
+    """
+    Helper to serialize Bookings as the Invoices schema for Financial Cloud.
+    """
+    bookings = Booking.objects.all().order_by('-created_at')
+    data = []
+    for b in bookings:
+        # Determine status string based on existing payment logic
+        if b.payment_status == 'paid':
+            status = 'Paid'
+        elif b.payment_status == 'refunded':
+            status = 'Refunded'
+        else:
+            status = 'Unpaid'
+            
+        data.append({
+            'id': f"INV-{b.id:04d}",
+            'client': b.name,
+            'date': b.event_date.strftime('%b %d, %Y') if b.event_date else 'TBD',
+            'total': f"₹{b.calculated_total_amount}",
+            'status': status,
         })
     return json.dumps(data)
 
