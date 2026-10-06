@@ -65,7 +65,7 @@
 
         <div class="hidden md:flex space-x-12 text-[10px] uppercase tracking-[0.4em] font-light">
             <a href="{% url 'home' %}" class="nav-link hover:text-gold transition-colors">Home</a>
-            <a href="{% url 'portfolio' %}" class="nav-link text-gold">Portfolio</a>
+            <a href="{% url 'portfolio' %}" class="nav-link text-gold">Stories</a>
             <a href="{% url 'about' %}" class="nav-link hover:text-gold transition-colors">About</a>
             <a href="{% url 'services' %}" class="nav-link hover:text-gold transition-colors">Services</a>
             <a href="{% url 'booking' %}"
@@ -84,7 +84,7 @@
         class="fixed inset-0 bg-dark z-40 flex flex-col items-center justify-center space-y-10 text-xl uppercase tracking-[0.4em] font-light"
         x-cloak>
         <a @click="mobileMenu = false" href="{% url 'home' %}">Home</a>
-        <a @click="mobileMenu = false" href="{% url 'portfolio' %}" class="text-gold">Portfolio</a>
+        <a @click="mobileMenu = false" href="{% url 'portfolio' %}" class="text-gold">Stories</a>
         <a @click="mobileMenu = false" href="{% url 'about' %}">About</a>
         <a @click="mobileMenu = false" href="{% url 'services' %}">Services</a>
         <a @click="mobileMenu = false" href="{% url 'booking' %}"
@@ -98,7 +98,7 @@
                 <div class="space-y-8 reveal">
                     <div class="inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.4em] text-white/40">
                         <a href="{% url 'portfolio' %}"
-                            class="text-gold hover:text-white transition-colors">Portfolio</a>
+                            class="text-gold hover:text-white transition-colors">Stories</a>
                         <span>/</span>
                         <span x-text="project.title"></span>
                     </div>

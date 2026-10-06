@@ -56,7 +56,7 @@
 
         <div class="hidden md:flex space-x-12 text-[10px] uppercase tracking-[0.4em] font-light">
             <a href="{% url 'home' %}" class="nav-link hover:text-gold transition-colors">Home</a>
-            <a href="{% url 'portfolio' %}" class="nav-link hover:text-gold transition-colors">Portfolio</a>
+            <a href="{% url 'portfolio' %}" class="nav-link hover:text-gold transition-colors">Stories</a>
             <a href="{% url 'about' %}" class="nav-link hover:text-gold transition-colors">About</a>
             <a href="{% url 'services' %}" class="nav-link text-gold">Services</a>
             <a href="{% url 'booking' %}" class="nav-link text-white font-semibold hover:text-gold transition-colors">Book Session</a>
@@ -93,7 +93,7 @@
         class="fixed inset-0 bg-dark z-40 flex flex-col items-center justify-center space-y-10 text-xl uppercase tracking-[0.4em] font-light"
         x-cloak>
         <a @click="mobileMenu = false" href="{% url 'home' %}">Home</a>
-        <a @click="mobileMenu = false" href="{% url 'portfolio' %}">Portfolio</a>
+        <a @click="mobileMenu = false" href="{% url 'portfolio' %}">Stories</a>
         <a @click="mobileMenu = false" href="{% url 'about' %}">About</a>
         <a @click="mobileMenu = false" href="{% url 'services' %}" class="text-gold">Services</a>
         <a @click="mobileMenu = false" href="{% url 'contact' %}">Contact</a>
