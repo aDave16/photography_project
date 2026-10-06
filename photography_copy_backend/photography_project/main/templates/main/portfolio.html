@@ -161,7 +161,7 @@
                     {% for image in images %}
                         <article class="group relative overflow-hidden rounded-xl bg-[#111] shadow-lg aspect-square">                       
                         {% if image.image %}
-                        <img src="{{ image.image.url }}" alt="{{ image.title }}" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
+                        <img src="{{ image.image.url }}" alt="{{ image.title }}" loading="eager" decoding="async" class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
                         {% endif %}
                         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
                         <div class="absolute inset-0 flex items-end p-4 md:p-5 z-10">
@@ -192,7 +192,7 @@
                         class="group relative overflow-hidden rounded-xl bg-[#111] shadow-lg mb-4 break-inside-avoid">
 
                         {% if image.image %}
-                        <img src="{{ image.image.url }}" alt="{{ image.title }}" loading="lazy" decoding="async"
+                        <img src="{{ image.image.url }}" alt="{{ image.title }}" loading="eager" decoding="async"
                             style="object-fit: cover;"
                             class="w-full h-auto object-contain transition duration-300 group-hover:scale-[1.02]">
                         {% endif %}

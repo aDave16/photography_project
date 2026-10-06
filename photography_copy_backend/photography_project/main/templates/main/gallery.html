@@ -120,7 +120,7 @@
             <div class="gallery-grid reveal">
                 <template x-for="photo in project.images" :key="photo.url">
                     <button type="button" @click="openLightbox(photo)" class="gallery-card group">
-                        <img :src="photo.url" :alt="photo.alt" loading="lazy" decoding="async">
+                        <img :src="photo.url" :alt="photo.alt" loading="eager" decoding="async">
                         <div class="image-overlay">
                             <div class="gallery-caption">
                                 <p x-text="photo.caption"></p>
@@ -146,7 +146,7 @@
                 class="absolute top-6 right-6 z-20 text-white hover:text-gold transition-colors">
                 <i data-lucide="x" class="w-8 h-8"></i>
             </button>
-            <img :src="lightboxPhoto.url" :alt="lightboxPhoto.alt" loading="lazy" decoding="async">
+            <img :src="lightboxPhoto.url" :alt="lightboxPhoto.alt" loading="eager" decoding="async">
             <div class="lightbox-copy">
                 <p class="text-white/80" x-text="lightboxPhoto.caption"></p>
                 <p class="mt-3 text-white/60" x-text="lightboxPhoto.secondary"></p>
